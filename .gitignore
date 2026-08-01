@@ -1,0 +1,23 @@
+# The datasets. Gigabytes, redistributed under their own licences, and
+# reproducible from scripts/fetch_kitti.py. The 20-frame fixture under
+# tests/fixtures/ is committed deliberately and is NOT covered by this.
+data/
+
+# Model weights and exports. Reproducible from the export script, and a
+# committed .onnx would be a binary blob nobody can review.
+models/
+*.onnx
+*.pt
+
+# Generated reports. The one committed artifact is written out explicitly.
+outputs/
+
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.hypothesis/
