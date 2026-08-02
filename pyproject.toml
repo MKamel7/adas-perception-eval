@@ -26,6 +26,17 @@ report = [
 export = [
     "ultralytics>=8.3",
 ]
+# The bidirectional traceability gate, imported rather than written a third
+# time. It lives in the fault injection harness because that is where it was
+# built and attacked; the virtual production cell imports the same thing.
+#
+# SOURCED FROM A LOCAL CHECKOUT below, not from the git tag, because v0.4.0 is
+# not pushed yet. That is a temporary state and it is written down rather than
+# left as a resolution failure for whoever clones this next: replace the
+# [tool.uv.sources] entry with the tag and nothing else changes.
+traceability = [
+    "fault-injection-harness",
+]
 
 [dependency-groups]
 dev = [
@@ -47,6 +58,12 @@ packages = ["src/ape"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-q --strict-markers"
+markers = [
+    # Claims a triggering condition from safety/triggering_conditions.yaml.
+    # scripts/check_conditions.py reads these by parsing, and fails the build
+    # if a condition has no test or a test names one that does not exist.
+    "demonstrates(condition): links a test to a SOTIF triggering condition",
+]
 
 [tool.ruff]
 line-length = 90
@@ -64,3 +81,6 @@ packages = ["ape"]
 [tool.coverage.run]
 branch = true
 source = ["src/ape"]
+
+[tool.uv.sources]
+fault-injection-harness = { path = "../fault-injection-harness", editable = true }

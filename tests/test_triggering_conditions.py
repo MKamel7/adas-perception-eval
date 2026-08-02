@@ -1,0 +1,205 @@
+"""Every triggering condition, recomputed from the committed results.
+
+The taxonomy in `safety/triggering_conditions.yaml` makes six claims about where
+this detector fails. Claims in a YAML file are assertions; these tests turn them
+into evidence by recomputing each number from `outputs/results.json`, which is
+the artifact the evaluation actually produced.
+
+WHAT THIS CATCHES that reading the file does not: a condition whose numbers were
+right when written and are now stale because the evaluation was re-run. A safety
+argument that drifts from its evidence is worse than one that never had any,
+because it still reads as though it were checked.
+
+Each test carries `@pytest.mark.demonstrates("TC-xx")`, and
+`scripts/check_conditions.py` fails the build if a condition has no test or a
+test names a condition that does not exist.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+RESULTS = ROOT / "outputs/results.json"
+ANALYSIS = ROOT / "safety/triggering_conditions.yaml"
+
+pytestmark = pytest.mark.skipif(
+    not RESULTS.exists(),
+    reason="no evaluation has been run; scripts/evaluate.py produces results.json")
+
+#: How close a recomputed number must be to the one written in the taxonomy.
+#: Tight enough that a re-run which genuinely moved the result fails this, loose
+#: enough to survive the rounding in the YAML.
+TOLERANCE = 0.005
+
+
+def results() -> dict:
+    return json.loads(RESULTS.read_text(encoding="utf-8"))
+
+
+def analysis() -> dict:
+    return yaml.safe_load(ANALYSIS.read_text(encoding="utf-8"))
+
+
+def condition(cid: str) -> dict:
+    found = next((c for c in analysis()["conditions"] if c["id"] == cid), None)
+    assert found is not None, f"{cid} is not in the taxonomy"
+    return found
+
+
+def ap(data: dict, dimension: str, bin_name: str, label: str) -> float:
+    for item in data["slices"]:
+        if item["dimension"] == dimension and item["bin"] == bin_name:
+            for cell in item["cells"]:
+                if cell["label"] == label:
+                    return float(cell["ap"])
+    raise AssertionError(f"no {label} cell for {dimension}/{bin_name}")
+
+
+# --- the conditions ----------------------------------------------------------
+@pytest.mark.demonstrates("TC-01")
+def test_pedestrians_are_not_detected_beyond_thirty_metres() -> None:
+    """The headline finding, and the one with a safety argument attached."""
+    data = results()
+    near = ap(data, "distance", "0-10 m", "Pedestrian")
+    far = ap(data, "distance", "30-40 m", "Pedestrian")
+    further = ap(data, "distance", ">50 m", "Pedestrian")
+
+    assert near > 0.6, f"near pedestrians should be found, got {near:.3f}"
+    assert far < 0.05, (
+        f"the claim is that detection collapses past 30 m; it is now "
+        f"{far:.3f}, so the taxonomy is stale")
+    assert further < 0.01
+
+    written = condition("TC-01")["evidence"]["measured"]
+    assert abs(written["30-40 m"] - far) < TOLERANCE
+    assert abs(written["0-10 m"] - near) < TOLERANCE
+
+
+@pytest.mark.demonstrates("TC-02")
+def test_occlusion_degrades_both_classes_monotonically() -> None:
+    """Monotone is part of the claim. A non-monotone result would mean the
+    annotation levels are not measuring what they say."""
+    data = results()
+    for label, floor in (("Pedestrian", 0.05), ("Car", 0.3)):
+        visible = ap(data, "occlusion", "fully visible", label)
+        partly = ap(data, "occlusion", "partly occluded", label)
+        largely = ap(data, "occlusion", "largely occluded", label)
+
+        assert visible > partly > largely, (
+            f"{label} occlusion is no longer monotone: "
+            f"{visible:.3f} / {partly:.3f} / {largely:.3f}")
+        assert largely < floor
+
+
+@pytest.mark.demonstrates("TC-02")
+def test_a_pedestrian_loses_most_performance_before_being_mostly_hidden() -> None:
+    """The specific number the condition rests on: the drop from fully to
+    PARTLY occluded, which is the urban case."""
+    data = results()
+    visible = ap(data, "occlusion", "fully visible", "Pedestrian")
+    partly = ap(data, "occlusion", "partly occluded", "Pedestrian")
+
+    assert visible / partly > 3.0, (
+        f"the claim is a 3.4x drop at partial occlusion; it is now "
+        f"{visible / partly:.1f}x")
+
+
+@pytest.mark.demonstrates("TC-03")
+def test_small_objects_are_missed_regardless_of_class() -> None:
+    data = results()
+    assert ap(data, "box height", "0-25 px", "Pedestrian") < 0.01
+    assert ap(data, "box height", "25-40 px", "Pedestrian") < 0.05
+    assert ap(data, "box height", "0-25 px", "Car") < 0.30
+
+    big = ap(data, "box height", ">160 px", "Pedestrian")
+    assert big > 0.6, f"large pedestrians should be found, got {big:.3f}"
+
+
+@pytest.mark.demonstrates("TC-04")
+def test_cars_degrade_with_range_but_gracefully() -> None:
+    """Both halves matter. That cars degrade supports the condition; that they
+    degrade gently is what distinguishes it from the pedestrian case and stops
+    the two being reported as one finding."""
+    data = results()
+    near = ap(data, "distance", "0-10 m", "Car")
+    far = ap(data, "distance", ">50 m", "Car")
+
+    assert near > 0.85
+    assert far < 0.25
+    assert far > 0.10, (
+        f"cars past 50 m are degraded, not blind, at {far:.3f}; if this falls "
+        f"below 0.1 the condition should be reworded to match the pedestrian one")
+
+
+@pytest.mark.demonstrates("TC-05")
+def test_truncation_costs_pedestrians_and_not_cars() -> None:
+    """The asymmetry IS the finding, so both directions are asserted."""
+    data = results()
+    car_none = ap(data, "truncation", "none", "Car")
+    car_heavy = ap(data, "truncation", ">50%", "Car")
+    ped_none = ap(data, "truncation", "none", "Pedestrian")
+    ped_mid = ap(data, "truncation", "30-50%", "Pedestrian")
+
+    assert abs(car_none - car_heavy) < 0.05, (
+        f"cars are claimed to be unaffected by truncation, but moved from "
+        f"{car_none:.3f} to {car_heavy:.3f}")
+    assert ped_none / max(ped_mid, 1e-9) > 2.0, (
+        f"pedestrians are claimed to lose about half, but moved from "
+        f"{ped_none:.3f} to {ped_mid:.3f}")
+
+
+@pytest.mark.demonstrates("TC-06")
+def test_the_cyclist_number_is_reported_and_disclaimed() -> None:
+    """A condition about the measurement rather than the detector, which is why
+    it hangs off the hazard about overstated performance."""
+    from ape.classes import EVALUATED, HEADLINE
+
+    data = results()
+
+    assert data["overall"]["Cyclist"] < 0.05
+    assert "Cyclist" in EVALUATED, "it must be reported"
+    assert "Cyclist" not in HEADLINE, "and must not be averaged into the headline"
+
+
+# --- the taxonomy itself -----------------------------------------------------
+def test_every_condition_names_a_hazard_that_exists() -> None:
+    document = analysis()
+    hazards = {h["id"] for h in document["hazards"]}
+
+    for item in document["conditions"]:
+        assert item["hazard"] in hazards, (
+            f"{item['id']} traces up to {item['hazard']}, which does not exist")
+
+
+def test_the_negative_result_is_still_recorded() -> None:
+    """A taxonomy containing only the slices that worked is a fishing
+    expedition with the evidence removed."""
+    document = analysis()
+
+    assert document.get("negative_results"), (
+        "the position slice showed no effect and that must stay on the record")
+
+    data = results()
+    spread = [ap(data, "position", b, "Car")
+              for b in ("left third", "centre third", "right third")]
+    assert max(spread) - min(spread) < 0.08, (
+        f"position now varies by {max(spread) - min(spread):.3f}; it was "
+        f"recorded as showing no effect and that is no longer true")
+
+
+def test_the_taxonomy_meets_the_milestone() -> None:
+    """M6 asks for at least five triggering conditions in SOTIF vocabulary,
+    each with the slice evidence that found it."""
+    document = analysis()
+
+    assert len(document["conditions"]) >= 5
+    for item in document["conditions"]:
+        assert item["evidence"]["measured"], f"{item['id']} has no measurement"
+        assert item["unknown_to_known"].strip(), (
+            f"{item['id']} does not say what it moved out of unknown-unsafe, "
+            f"which is the only reason to write it down")

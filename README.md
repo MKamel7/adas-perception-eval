@@ -14,8 +14,9 @@ actually spend their days on.
 
 ## Status
 
-**Milestones 1, 3, 4 and 7 are done. Milestone 2 is done and MISSED its
-performance criterion.** Milestones 5, 6 and 8 are not started. The criteria were
+**Milestones 1, 3, 4, 6, 7 and 8 are done. Milestone 2 is done and MISSED its
+performance criterion. Milestone 5 is in progress**, waiting on a 7.5 GB
+download. The criteria were
 written before any code, so a result cannot be rationalised into a pass
 afterwards, and that cuts both ways: M2's budget is missed and is recorded as
 missed rather than adjusted.
@@ -124,10 +125,10 @@ the measurement path may import it, or the validation would be circular.
 | M2 | Inference | **done, criterion missed.** Export is reproducible and the class mapping is data. 1500 frames took **13 minutes against a 5 minute budget**, see below |
 | M3 | Metrics validated | **done.** Own AP agrees with `pycocotools` **exactly, to six decimal places**, against a required 0.001 |
 | M4 | Slicing | **done.** Six dimensions, every one from a ground-truth attribute, all committed before the run |
-| M5 | Sim-to-real | not started. Virtual KITTI 2 is 7.5 GB and is not yet downloaded |
-| M6 | Taxonomy | not started. The slice evidence it needs now exists |
+| M5 | Sim-to-real | **in progress.** Virtual KITTI 2 labels are in, the 7.5 GB imagery is downloading |
+| M6 | Taxonomy | **done.** Six triggering conditions, three hazards, seven demonstrating tests, gated in both directions |
 | M7 | Report | **done.** One command produces `outputs/report.html` |
-| M8 | Demo | not started |
+| M8 | Demo and README | **done.** Example frames rendered by rule, README and CV bullet below |
 
 ### M2 missed its budget, and the reason is not the code
 
@@ -147,6 +148,60 @@ The budget is missed by YOLOv8s on a 15 W mobile CPU, not by the pipeline
 around it. YOLOv8n would fit the budget at a cost in accuracy; that trade has
 not been made because the accuracy is what is being measured. The criterion was
 optimistic when it was written and it is left standing, marked as missed.
+
+## The SOTIF taxonomy, and the gate under it
+
+`safety/triggering_conditions.yaml` records six triggering conditions against
+three hazards. SOTIF's device is four areas, known-safe, known-unsafe,
+unknown-safe and **unknown-unsafe**, and the whole job is shrinking the last.
+Each condition therefore states what it moved out of unknown-unsafe, not just
+that a number was low.
+
+| | Condition | Evidence |
+|---|---|---|
+| TC-01 | Pedestrian beyond ~30 m | AP 0.689 → 0.007 → 0.000 by range |
+| TC-02 | Occlusion, the strongest predictor measured | Pedestrian 0.642 → 0.188 → 0.023 |
+| TC-03 | Small apparent size, independent of range | Pedestrian under 40 px: 0.005 |
+| TC-04 | Vehicles beyond 50 m | Car 0.900 → 0.172 |
+| TC-05 | Truncation costs pedestrians, not cars | Car flat at 0.72-0.75; Pedestrian 0.479 → 0.103 |
+| TC-06 | The class mapping cannot represent a cyclist | AP 0.006, a measurement artefact, not a detector limit |
+
+**A negative result is recorded in the same file**: horizontal position in the
+frame predicts nothing (Car 0.715 / 0.705 / 0.680 across thirds). A taxonomy
+containing only the slices that worked is a fishing expedition with the evidence
+removed.
+
+**The argument is gated in both directions.** A condition with no test fails the
+build; a test naming a condition that does not exist fails it too, which is the
+quieter failure and the one a single mistyped character causes. All three failure
+modes have been watched failing, because a gate nobody has seen fail is an
+assumption rather than a control.
+
+The gate itself is `fih.gate`, **imported from the
+[fault injection harness](https://github.com/MKamel7/fault-injection-harness)
+rather than written a third time.** It was built there against ISO 26262
+requirements and is used by the virtual production cell for PackML safety
+requirements. This is its third safety argument and the first where the
+requirements are perception insufficiencies rather than failures: the hazards
+differ, the evidence differs, and the two ways an argument can have a hole do
+not.
+
+Example frames are rendered by `scripts/render_examples.py`, chosen **by rule**
+(the frame with the most missed objects in that slice) rather than by eye, since
+hand-picked frames would be illustrations of an argument instead of evidence for
+it.
+
+## CV bullet
+
+> **ADAS perception evaluation pipeline:** slice-based detection metrics on
+> KITTI with the mAP implementation validated against the reference COCO
+> implementation to six decimal places, a six-condition triggering-condition
+> taxonomy in ISO 21448 SOTIF vocabulary gated bidirectionally against its
+> evidence, and the finding that a detector reported at 0.50 mAP for pedestrians
+> scores 0.007 beyond 30 metres.
+
+Say "SOTIF vocabulary", never "SOTIF compliant". Say "pretrained detector", never
+imply training.
 
 ## Expected results, recorded before running
 

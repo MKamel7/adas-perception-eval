@@ -28,6 +28,9 @@ reference = [
 report = [
     { name = "jinja2" },
 ]
+traceability = [
+    { name = "fault-injection-harness" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -40,6 +43,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "fault-injection-harness", marker = "extra == 'traceability'", editable = "../fault-injection-harness" },
     { name = "jinja2", marker = "extra == 'report'", specifier = ">=3.1" },
     { name = "numpy", marker = "extra == 'infer'", specifier = ">=1.26" },
     { name = "onnxruntime", marker = "extra == 'infer'", specifier = ">=1.18" },
@@ -47,7 +51,7 @@ requires-dist = [
     { name = "pycocotools", marker = "extra == 'reference'", specifier = ">=2.0.7" },
     { name = "ultralytics", marker = "extra == 'export'", specifier = ">=8.3" },
 ]
-provides-extras = ["infer", "reference", "report", "export"]
+provides-extras = ["infer", "reference", "report", "export", "traceability"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -395,6 +399,38 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a9/95/a3dbbb5028f35eafb79008e7522a75244477d2838f38cbb722248dabc2a8/cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c", size = 7615, upload-time = "2023-10-07T05:32:18.335Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30", size = 8321, upload-time = "2023-10-07T05:32:16.783Z" },
+]
+
+[[package]]
+name = "embedded-test-automation"
+version = "3.1.0"
+source = { git = "https://github.com/MKamel7/embedded-test-automation?rev=v3.1#092e0615584a76649c89f165de48ff5562fc7484" }
+
+[[package]]
+name = "fault-injection-harness"
+version = "0.3.0"
+source = { editable = "../fault-injection-harness" }
+dependencies = [
+    { name = "embedded-test-automation" },
+    { name = "pyyaml" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "embedded-test-automation", git = "https://github.com/MKamel7/embedded-test-automation?rev=v3.1" },
+    { name = "pyyaml", specifier = ">=6.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "hypothesis", specifier = ">=6.100" },
+    { name = "matplotlib", specifier = ">=3.8" },
+    { name = "mypy", specifier = ">=1.11" },
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest-cov", specifier = ">=5.0" },
+    { name = "pytest-html", specifier = ">=4.0" },
+    { name = "ruff", specifier = ">=0.6" },
+    { name = "types-pyyaml", specifier = ">=6.0" },
 ]
 
 [[package]]

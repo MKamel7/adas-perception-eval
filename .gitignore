@@ -16,6 +16,10 @@ models/
 outputs/*
 !outputs/report.html
 !outputs/results.json
+!outputs/traceability.md
+!outputs/examples/
+outputs/examples/*
+!outputs/examples/*.png
 
 __pycache__/
 *.py[cod]

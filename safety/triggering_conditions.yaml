@@ -1,0 +1,208 @@
+# Triggering conditions, in ISO 21448 (SOTIF) vocabulary.
+#
+# SOTIF's central device is four areas: known-safe, known-unsafe, unknown-safe
+# and UNKNOWN-UNSAFE. The whole job is shrinking the last one. So this file is
+# not a list of interesting example frames. It is a record of conditions moved
+# out of unknown-unsafe and into known-unsafe, where they can be argued about,
+# budgeted for, and designed against.
+#
+# EVERY CONDITION HERE IS MEASURED, not asserted. Each names the slice that
+# found it and the number that slice produced, and each is verified by a test
+# that recomputes the number from the committed results. A condition whose test
+# is missing fails the build, and a test claiming a condition that does not
+# exist fails it too. That gate is `fih.gate`, imported from the fault injection
+# harness rather than written a third time.
+#
+# NO COMPLIANCE IS CLAIMED. The vocabulary is borrowed on purpose. There is no
+# ODD definition, no exposure or controllability analysis and no residual risk
+# argument, so this is SOTIF's language applied to a public dataset, not SOTIF's
+# process performed on a product.
+
+hazards:
+  - id: H-1
+    text: >
+      The vehicle fails to react to a vulnerable road user in its path because
+      perception did not report one.
+    harm: Collision with a pedestrian or cyclist at road speed.
+
+  - id: H-2
+    text: >
+      The vehicle fails to react to a vehicle ahead because perception did not
+      report it in time to act.
+    harm: Rear-end collision, or a late and violent intervention.
+
+  - id: H-3
+    text: >
+      Reported performance overstates real performance, so a limitation is
+      never designed against because nobody knew it was there.
+    harm: >
+      Not a collision on its own. It is the condition under which the other two
+      go unmitigated, which is why it is listed as a hazard rather than as a
+      process complaint.
+
+conditions:
+  - id: TC-01
+    hazard: H-1
+    title: Pedestrian beyond roughly 30 metres
+    text: >
+      Pedestrian detection collapses with range far faster than the aggregate
+      suggests. It is not a gradual decline: past 30 m the detector finds almost
+      nothing, and past 50 m it finds nothing at all.
+    evidence:
+      slice: distance
+      measured:
+        0-10 m: 0.689
+        10-20 m: 0.529
+        20-30 m: 0.181
+        30-40 m: 0.007
+        40-50 m: 0.001
+        ">50 m": 0.000
+      objects: 893
+    why_it_matters: >
+      At 50 km/h a vehicle covers 30 m in about two seconds, which is close to
+      the total budget for perceive, decide and brake. A detector reported at
+      0.495 mAP is, at the range where a warning would still be useful, blind.
+    unknown_to_known: >
+      Range was previously an unstated assumption. It is now a stated limit with
+      a number attached, which is what makes it something an integrator can
+      design a sensor set around.
+
+  - id: TC-02
+    hazard: H-1
+    title: Occlusion, which matters more than anything else measured
+    text: >
+      Occlusion is the single strongest predictor of failure in this evaluation,
+      stronger than distance once size is accounted for, and it is monotone for
+      both classes.
+    evidence:
+      slice: occlusion
+      measured:
+        Pedestrian fully visible: 0.642
+        Pedestrian partly occluded: 0.188
+        Pedestrian largely occluded: 0.023
+        Car fully visible: 0.887
+        Car partly occluded: 0.655
+        Car largely occluded: 0.250
+      objects: 1141
+    why_it_matters: >
+      A partly occluded pedestrian is the archetypal urban case: stepping out
+      from between parked cars, at the kerb behind a van. That is precisely the
+      case where the detector has lost roughly two thirds of its performance,
+      and precisely the case where reaction time is shortest.
+    unknown_to_known: >
+      "Occlusion is hard" is a truism. The measured shape is not: performance
+      falls by 3.4x from fully to partly occluded for pedestrians, before the
+      annotator would even call the object mostly hidden.
+
+  - id: TC-03
+    hazard: H-1
+    title: Small apparent size, independent of range
+    text: >
+      Apparent size predicts failure separately from distance. A pedestrian
+      under 40 pixels tall is essentially undetected regardless of why it is
+      small.
+    evidence:
+      slice: box height
+      measured:
+        Pedestrian 0-25 px: 0.000
+        Pedestrian 25-40 px: 0.005
+        Pedestrian 40-80 px: 0.144
+        Pedestrian 80-160 px: 0.477
+        Car 0-25 px: 0.244
+        Car 25-40 px: 0.546
+      objects: 1493
+    why_it_matters: >
+      This separates a resolution limit from a range limit, and they are
+      different problems with different fixes. A resolution limit is answered
+      with a longer lens or a higher-resolution sensor; a range limit that
+      persisted at adequate resolution would point at the model instead.
+      Measured here, the two track each other, which points at resolution.
+    unknown_to_known: >
+      The 40-pixel floor is a number a camera and lens choice can be checked
+      against before anything is built.
+
+  - id: TC-04
+    hazard: H-2
+    title: Vehicles beyond 50 metres
+    text: >
+      Car detection degrades with range far more gracefully than pedestrian
+      detection, but still loses most of its performance at highway-relevant
+      distances.
+    evidence:
+      slice: distance
+      measured:
+        0-10 m: 0.900
+        30-40 m: 0.518
+        40-50 m: 0.341
+        ">50 m": 0.172
+      objects: 5579
+    why_it_matters: >
+      50 m is under two seconds of closing distance at a 100 km/h speed
+      differential. A detector at 0.172 there is not a basis for an automated
+      longitudinal decision, though it may be adequate for a warning.
+    unknown_to_known: >
+      Gives the range beyond which this camera-only configuration should not be
+      trusted alone, which is an argument for sensor fusion made with a number
+      rather than by assertion.
+
+  - id: TC-05
+    hazard: H-1
+    title: Truncation hurts pedestrians and does not hurt cars
+    text: >
+      An object leaving the frame costs pedestrian performance roughly half,
+      while leaving car performance essentially untouched.
+    evidence:
+      slice: truncation
+      measured:
+        Car none: 0.736
+        Car 15-30%: 0.724
+        Car ">50%": 0.724
+        Pedestrian none: 0.479
+        Pedestrian 15-30%: 0.187
+        Pedestrian 30-50%: 0.103
+      objects: 756
+    why_it_matters: >
+      A truncated pedestrian is one at the edge of the field of view, which is
+      where a crossing pedestrian appears first. Losing them there costs exactly
+      the reaction time that makes the detection useful.
+    unknown_to_known: >
+      The asymmetry is the finding. A car is recognisable from a fragment
+      because its parts are distinctive; a person apparently is not, and that is
+      a class-specific limitation rather than a general one.
+
+  - id: TC-06
+    hazard: H-3
+    title: The class mapping cannot represent a cyclist
+    text: >
+      KITTI annotates a rider and bicycle as a single object. A COCO-trained
+      detector emits a person and a bicycle separately, and neither box has the
+      shape of the annotation. The reported Cyclist figure of 0.006 measures
+      that mismatch, not detection ability.
+    evidence:
+      slice: overall
+      measured:
+        Cyclist AP: 0.006
+        Cyclist recall: 0.062
+      objects: 341
+    why_it_matters: >
+      This is the condition that makes the other five believable. An evaluation
+      that reported 0.006 as a detector limitation would be wrong, and an
+      evaluation that quietly dropped cyclists would be hiding the wrongness.
+      Reported, excluded from the headline, and explained.
+    unknown_to_known: >
+      Records that a class exists which this pipeline cannot currently measure,
+      which is a known gap rather than a silently absent one.
+
+# Deliberately recorded because it did NOT show an effect. A taxonomy that only
+# contains the slices that worked is a fishing expedition with the evidence
+# removed, so the negative result is kept in the same file as the positives.
+negative_results:
+  - slice: position
+    finding: >
+      Horizontal position in the frame does not predict failure. Car AP is 0.715
+      / 0.705 / 0.680 across left, centre and right thirds, and Pedestrian is
+      0.392 / 0.334 / 0.399. No triggering condition is claimed from it.
+    why_recorded: >
+      It was defined before the run alongside the five that did show something,
+      and dropping it now would make the remaining set look more predictive than
+      it was.
