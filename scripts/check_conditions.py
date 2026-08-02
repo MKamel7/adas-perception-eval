@@ -75,13 +75,18 @@ def matrix(analysis: dict, claimed: dict[str, list[tuple[str, str]]]) -> str:
                      f"| {hazard['harm'].strip()} |")
 
     lines += ["", "## Triggering conditions, and what demonstrates them", "",
-              "| | Condition | Hazard | Slice | Demonstrated by |",
-              "|---|---|---|---|---|"]
+              "| | Condition | Hazard | Slices | Figures | Demonstrated by |",
+              "|---|---|---|---|---|---|"]
     for condition in analysis["conditions"]:
         cid = str(condition["id"])
         tests = "<br>".join(f"`{test}`" for _, test in claimed.get(cid, []))
+        # Evidence is a LIST of (slice, class, bin, ap) entries, one row per
+        # measured figure, so that the test suite can enumerate every claim
+        # rather than checking a subset somebody chose.
+        slices = sorted({e["slice"] for e in condition["evidence"]})
         lines.append(f"| {cid} | {condition['title']} | {condition['hazard']} "
-                     f"| {condition['evidence']['slice']} | {tests} |")
+                     f"| {', '.join(slices)} | {len(condition['evidence'])} "
+                     f"| {tests} |")
 
     negatives = analysis.get("negative_results", [])
     if negatives:
@@ -95,7 +100,9 @@ def matrix(analysis: dict, claimed: dict[str, list[tuple[str, str]]]) -> str:
               f"- Hazards: **{len(hazards)}**",
               f"- Triggering conditions: **{len(analysis['conditions'])}**",
               f"- Tests demonstrating a condition: "
-              f"**{sum(len(v) for v in claimed.values())}**", ""]
+              f"**{sum(len(v) for v in claimed.values())}**",
+              f"- Measured figures, every one checked against the evaluation: "
+              f"**{sum(len(c['evidence']) for c in analysis['conditions'])}**", ""]
     return "\n".join(lines)
 
 

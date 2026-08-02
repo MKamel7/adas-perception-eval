@@ -42,6 +42,8 @@ result:
 | moderate | 0.882 | 0.594 |
 | hard | 0.772 | 0.501 |
 | 0-10 m | 0.900 | 0.689 |
+| 10-20 m | 0.804 | 0.361 |
+| 20-30 m | 0.656 | 0.069 |
 | 30-40 m | 0.518 | **0.007** |
 | 40-50 m | 0.341 | **0.001** |
 | >50 m | 0.172 | **0.000** |
@@ -209,7 +211,7 @@ that a number was low.
 
 | | Condition | Evidence |
 |---|---|---|
-| TC-01 | Pedestrian beyond ~30 m | AP 0.689 → 0.007 → 0.000 by range |
+| TC-01 | Pedestrian beyond ~30 m | AP 0.689 → 0.361 → 0.069 → 0.007 → 0.000 by range |
 | TC-02 | Occlusion, the strongest predictor measured | Pedestrian 0.642 → 0.188 → 0.023 |
 | TC-03 | Small apparent size, independent of range | Pedestrian under 40 px: 0.005 |
 | TC-04 | Vehicles beyond 50 m | Car 0.900 → 0.172 |
@@ -220,6 +222,14 @@ that a number was low.
 frame predicts nothing (Car 0.715 / 0.705 / 0.680 across thirds). A taxonomy
 containing only the slices that worked is a fishing expedition with the evidence
 removed.
+
+**Every number in the taxonomy is checked against `outputs/results.json`, not a
+sample of them.** That is not how it started: TC-01 originally claimed 0.529 at
+10-20 m and 0.181 at 20-30 m, both typed from memory, and the test guarding it
+verified two of its six figures which both happened to be right. Two fabricated
+numbers sat in a safety argument behind a passing gate. The evidence is now
+structured as `(slice, class, bin, ap)` so that "every entry" is something a
+machine enumerates rather than something a person promises.
 
 **The argument is gated in both directions.** A condition with no test fails the
 build; a test naming a condition that does not exist fails it too, which is the

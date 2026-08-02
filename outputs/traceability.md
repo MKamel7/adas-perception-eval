@@ -14,14 +14,14 @@ Every condition traces up to a hazard and down to at least one test that recompu
 
 ## Triggering conditions, and what demonstrates them
 
-| | Condition | Hazard | Slice | Demonstrated by |
-|---|---|---|---|---|
-| TC-01 | Pedestrian beyond roughly 30 metres | H-1 | distance | `test_pedestrians_are_not_detected_beyond_thirty_metres` |
-| TC-02 | Occlusion, which matters more than anything else measured | H-1 | occlusion | `test_occlusion_degrades_both_classes_monotonically`<br>`test_a_pedestrian_loses_most_performance_before_being_mostly_hidden` |
-| TC-03 | Small apparent size, independent of range | H-1 | box height | `test_small_objects_are_missed_regardless_of_class` |
-| TC-04 | Vehicles beyond 50 metres | H-2 | distance | `test_cars_degrade_with_range_but_gracefully` |
-| TC-05 | Truncation hurts pedestrians and does not hurt cars | H-1 | truncation | `test_truncation_costs_pedestrians_and_not_cars` |
-| TC-06 | The class mapping cannot represent a cyclist | H-3 | overall | `test_the_cyclist_number_is_reported_and_disclaimed` |
+| | Condition | Hazard | Slices | Figures | Demonstrated by |
+|---|---|---|---|---|---|
+| TC-01 | Pedestrian beyond roughly 30 metres | H-1 | distance | 6 | `test_pedestrians_are_not_detected_beyond_thirty_metres` |
+| TC-02 | Occlusion, which matters more than anything else measured | H-1 | occlusion | 6 | `test_occlusion_degrades_both_classes_monotonically`<br>`test_a_pedestrian_loses_most_performance_before_being_mostly_hidden` |
+| TC-03 | Small apparent size, independent of range | H-1 | box height | 6 | `test_small_objects_are_missed_regardless_of_class` |
+| TC-04 | Vehicles beyond 50 metres | H-2 | distance | 4 | `test_cars_degrade_with_range_but_gracefully` |
+| TC-05 | Truncation hurts pedestrians and does not hurt cars | H-1 | truncation | 6 | `test_truncation_costs_pedestrians_and_not_cars` |
+| TC-06 | The class mapping cannot represent a cyclist | H-3 | overall | 1 | `test_the_cyclist_number_is_reported_and_disclaimed` |
 
 ## Slices that showed nothing
 
@@ -34,3 +34,4 @@ Recorded because a taxonomy containing only the slices that worked is a fishing 
 - Hazards: **3**
 - Triggering conditions: **6**
 - Tests demonstrating a condition: **7**
+- Measured figures, every one checked against the evaluation: **29**

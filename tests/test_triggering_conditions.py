@@ -75,10 +75,6 @@ def test_pedestrians_are_not_detected_beyond_thirty_metres() -> None:
         f"{far:.3f}, so the taxonomy is stale")
     assert further < 0.01
 
-    written = condition("TC-01")["evidence"]["measured"]
-    assert abs(written["30-40 m"] - far) < TOLERANCE
-    assert abs(written["0-10 m"] - near) < TOLERANCE
-
 
 @pytest.mark.demonstrates("TC-02")
 def test_occlusion_degrades_both_classes_monotonically() -> None:
@@ -166,6 +162,41 @@ def test_the_cyclist_number_is_reported_and_disclaimed() -> None:
     assert "Cyclist" not in HEADLINE, "and must not be averaged into the headline"
 
 
+# --- every number in the file, not a hand-picked two -------------------------
+def evidence_entries() -> list[tuple[str, dict]]:
+    return [(c["id"], e) for c in analysis()["conditions"] for e in c["evidence"]]
+
+
+@pytest.mark.parametrize("cid,entry", evidence_entries(),
+                         ids=lambda v: v if isinstance(v, str) else
+                         f"{v['class']}-{v['bin']}")
+def test_every_claimed_number_matches_the_evaluation(cid: str, entry: dict) -> None:
+    """The check that should have existed from the start.
+
+    THIS TEST EXISTS BECAUSE ITS ABSENCE LET TWO FABRICATED NUMBERS INTO A
+    SAFETY ARGUMENT. TC-01 originally claimed 0.529 at 10-20 m and 0.181 at
+    20-30 m; the measured values are 0.361 and 0.069. They were typed from
+    memory rather than read from results.json, and the test that was supposed to
+    guard TC-01 checked two of its six numbers, both of which happened to be
+    right.
+
+    A gate that verifies a subset chosen by the same person who wrote the claims
+    is not a gate. Every entry is checked now, and the evidence is structured as
+    (slice, class, bin, ap) precisely so that "every" is something a machine can
+    enumerate rather than something a human promises.
+    """
+    data = results()
+
+    if entry["slice"] == "overall":
+        actual = float(data["overall"][entry["class"]])
+    else:
+        actual = ap(data, entry["slice"], entry["bin"], entry["class"])
+
+    assert abs(actual - entry["ap"]) < TOLERANCE, (
+        f"{cid} claims {entry['class']} {entry['slice']}/{entry['bin']} is "
+        f"{entry['ap']:.3f}; the evaluation says {actual:.3f}")
+
+
 # --- the taxonomy itself -----------------------------------------------------
 def test_every_condition_names_a_hazard_that_exists() -> None:
     document = analysis()
@@ -199,7 +230,11 @@ def test_the_taxonomy_meets_the_milestone() -> None:
 
     assert len(document["conditions"]) >= 5
     for item in document["conditions"]:
-        assert item["evidence"]["measured"], f"{item['id']} has no measurement"
+        assert item["evidence"], f"{item['id']} has no measurement"
+        for entry in item["evidence"]:
+            assert {"slice", "class", "bin", "ap"} <= set(entry), (
+                f"{item['id']} has an evidence entry that cannot be checked "
+                f"automatically: {entry}")
         assert item["unknown_to_known"].strip(), (
             f"{item['id']} does not say what it moved out of unknown-unsafe, "
             f"which is the only reason to write it down")

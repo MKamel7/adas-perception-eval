@@ -49,15 +49,12 @@ conditions:
       suggests. It is not a gradual decline: past 30 m the detector finds almost
       nothing, and past 50 m it finds nothing at all.
     evidence:
-      slice: distance
-      measured:
-        0-10 m: 0.689
-        10-20 m: 0.529
-        20-30 m: 0.181
-        30-40 m: 0.007
-        40-50 m: 0.001
-        ">50 m": 0.000
-      objects: 893
+      - {slice: 'distance', class: Pedestrian, bin: '0-10 m', ap: 0.689}
+      - {slice: 'distance', class: Pedestrian, bin: '10-20 m', ap: 0.361}
+      - {slice: 'distance', class: Pedestrian, bin: '20-30 m', ap: 0.069}
+      - {slice: 'distance', class: Pedestrian, bin: '30-40 m', ap: 0.007}
+      - {slice: 'distance', class: Pedestrian, bin: '40-50 m', ap: 0.001}
+      - {slice: 'distance', class: Pedestrian, bin: '>50 m', ap: 0.000}
     why_it_matters: >
       At 50 km/h a vehicle covers 30 m in about two seconds, which is close to
       the total budget for perceive, decide and brake. A detector reported at
@@ -75,15 +72,12 @@ conditions:
       stronger than distance once size is accounted for, and it is monotone for
       both classes.
     evidence:
-      slice: occlusion
-      measured:
-        Pedestrian fully visible: 0.642
-        Pedestrian partly occluded: 0.188
-        Pedestrian largely occluded: 0.023
-        Car fully visible: 0.887
-        Car partly occluded: 0.655
-        Car largely occluded: 0.250
-      objects: 1141
+      - {slice: 'occlusion', class: Pedestrian, bin: 'fully visible', ap: 0.642}
+      - {slice: 'occlusion', class: Pedestrian, bin: 'partly occluded', ap: 0.188}
+      - {slice: 'occlusion', class: Pedestrian, bin: 'largely occluded', ap: 0.023}
+      - {slice: 'occlusion', class: Car, bin: 'fully visible', ap: 0.887}
+      - {slice: 'occlusion', class: Car, bin: 'partly occluded', ap: 0.655}
+      - {slice: 'occlusion', class: Car, bin: 'largely occluded', ap: 0.250}
     why_it_matters: >
       A partly occluded pedestrian is the archetypal urban case: stepping out
       from between parked cars, at the kerb behind a van. That is precisely the
@@ -102,15 +96,12 @@ conditions:
       under 40 pixels tall is essentially undetected regardless of why it is
       small.
     evidence:
-      slice: box height
-      measured:
-        Pedestrian 0-25 px: 0.000
-        Pedestrian 25-40 px: 0.005
-        Pedestrian 40-80 px: 0.144
-        Pedestrian 80-160 px: 0.477
-        Car 0-25 px: 0.244
-        Car 25-40 px: 0.546
-      objects: 1493
+      - {slice: 'box height', class: Pedestrian, bin: '0-25 px', ap: 0.000}
+      - {slice: 'box height', class: Pedestrian, bin: '25-40 px', ap: 0.005}
+      - {slice: 'box height', class: Pedestrian, bin: '40-80 px', ap: 0.144}
+      - {slice: 'box height', class: Pedestrian, bin: '80-160 px', ap: 0.477}
+      - {slice: 'box height', class: Car, bin: '0-25 px', ap: 0.244}
+      - {slice: 'box height', class: Car, bin: '25-40 px', ap: 0.546}
     why_it_matters: >
       This separates a resolution limit from a range limit, and they are
       different problems with different fixes. A resolution limit is answered
@@ -129,13 +120,10 @@ conditions:
       detection, but still loses most of its performance at highway-relevant
       distances.
     evidence:
-      slice: distance
-      measured:
-        0-10 m: 0.900
-        30-40 m: 0.518
-        40-50 m: 0.341
-        ">50 m": 0.172
-      objects: 5579
+      - {slice: 'distance', class: Car, bin: '0-10 m', ap: 0.862}
+      - {slice: 'distance', class: Car, bin: '30-40 m', ap: 0.518}
+      - {slice: 'distance', class: Car, bin: '40-50 m', ap: 0.341}
+      - {slice: 'distance', class: Car, bin: '>50 m', ap: 0.172}
     why_it_matters: >
       50 m is under two seconds of closing distance at a 100 km/h speed
       differential. A detector at 0.172 there is not a basis for an automated
@@ -152,15 +140,12 @@ conditions:
       An object leaving the frame costs pedestrian performance roughly half,
       while leaving car performance essentially untouched.
     evidence:
-      slice: truncation
-      measured:
-        Car none: 0.736
-        Car 15-30%: 0.724
-        Car ">50%": 0.724
-        Pedestrian none: 0.479
-        Pedestrian 15-30%: 0.187
-        Pedestrian 30-50%: 0.103
-      objects: 756
+      - {slice: 'truncation', class: Car, bin: 'none', ap: 0.736}
+      - {slice: 'truncation', class: Car, bin: '15-30%', ap: 0.724}
+      - {slice: 'truncation', class: Car, bin: '>50%', ap: 0.724}
+      - {slice: 'truncation', class: Pedestrian, bin: 'none', ap: 0.479}
+      - {slice: 'truncation', class: Pedestrian, bin: '15-30%', ap: 0.187}
+      - {slice: 'truncation', class: Pedestrian, bin: '30-50%', ap: 0.103}
     why_it_matters: >
       A truncated pedestrian is one at the edge of the field of view, which is
       where a crossing pedestrian appears first. Losing them there costs exactly
@@ -179,11 +164,7 @@ conditions:
       shape of the annotation. The reported Cyclist figure of 0.006 measures
       that mismatch, not detection ability.
     evidence:
-      slice: overall
-      measured:
-        Cyclist AP: 0.006
-        Cyclist recall: 0.062
-      objects: 341
+      - {slice: 'overall', class: Cyclist, bin: 'all', ap: 0.006}
     why_it_matters: >
       This is the condition that makes the other five believable. An evaluation
       that reported 0.006 as a detector limitation would be wrong, and an

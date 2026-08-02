@@ -18,6 +18,7 @@ outputs/*
 !outputs/results.json
 !outputs/traceability.md
 !outputs/sim_to_real.json
+!outputs/p3-demo.mp4
 !outputs/examples/
 outputs/examples/*
 !outputs/examples/*.png
