@@ -14,9 +14,8 @@ actually spend their days on.
 
 ## Status
 
-**Milestones 1, 3, 4, 6, 7 and 8 are done. Milestone 2 is done and MISSED its
-performance criterion. Milestone 5 is in progress**, waiting on a 7.5 GB
-download. The criteria were
+**All eight milestones are done. Milestone 2 MISSED its performance criterion**
+and is recorded as missed rather than adjusted to fit the result. The criteria were
 written before any code, so a result cannot be rationalised into a pass
 afterwards, and that cuts both ways: M2's budget is missed and is recorded as
 missed rather than adjusted.
@@ -125,7 +124,7 @@ the measurement path may import it, or the validation would be circular.
 | M2 | Inference | **done, criterion missed.** Export is reproducible and the class mapping is data. 1500 frames took **13 minutes against a 5 minute budget**, see below |
 | M3 | Metrics validated | **done.** Own AP agrees with `pycocotools` **exactly, to six decimal places**, against a required 0.001 |
 | M4 | Slicing | **done.** Six dimensions, every one from a ground-truth attribute, all committed before the run |
-| M5 | Sim-to-real | **in progress.** Virtual KITTI 2 labels are in, the 7.5 GB imagery is downloading |
+| M5 | Sim-to-real | **done.** Six renders of Scene01, rank correlation 0.943 against real, and the finding below |
 | M6 | Taxonomy | **done.** Six triggering conditions, three hazards, seven demonstrating tests, gated in both directions |
 | M7 | Report | **done.** One command produces `outputs/report.html` |
 | M8 | Demo and README | **done.** Example frames rendered by rule, README and CV bullet below |
@@ -148,6 +147,57 @@ The budget is missed by YOLOv8s on a 15 W mobile CPU, not by the pipeline
 around it. YOLOv8n would fit the budget at a cost in accuracy; that trade has
 not been made because the accuracy is what is being measured. The criterion was
 optimistic when it was written and it is left standing, marked as missed.
+
+## M5: would the simulation have told you the same thing?
+
+**No, and for a better reason than a bad correlation.**
+
+**Virtual KITTI 2 contains no pedestrians.** Car 245 tracks, Van 22, Truck 6,
+across all five scenes. This project's headline finding, that pedestrian
+detection collapses beyond 30 m, **cannot be checked against the simulation at
+all** — not mismeasured, untestable. A validation programme leaning on this
+synthetic data would have had no way to see it. That is the sim-to-real result,
+and it arrived before a single frame of inference.
+
+For cars, which can be compared, the answer is more subtle and is the project's
+own thesis turned on itself:
+
+| distance | real AP | real share | synthetic AP | synthetic share |
+|---|---|---|---|---|
+| 0-10 m | 0.862 | 12.8% | 0.885 | 3.7% |
+| 10-20 m | 0.804 | 22.9% | 0.975 | 6.9% |
+| 20-30 m | 0.656 | 23.2% | 0.801 | 8.3% |
+| 30-40 m | 0.518 | 17.4% | 0.557 | 9.8% |
+| 40-50 m | 0.341 | 12.3% | 0.367 | 9.9% |
+| >50 m | 0.172 | 11.4% | 0.098 | **61.5%** |
+| **overall** | **0.754** | | **0.350** | |
+
+**Band by band the two agree closely** — synthetic is equal or better in five of
+six, and the difficulty ordering has a rank correlation of **0.943**, disagreeing
+only on which of the two *easiest* bands is easiest. **In aggregate they look
+completely different**, 0.754 against 0.350.
+
+The gap is not behaviour, it is **composition**: 61.5% of the synthetic cars sit
+beyond 50 m against 11.4% of the real ones. An aggregate sim-to-real comparison
+would have concluded that the simulation behaves nothing like reality. It does;
+it is simply populated differently. That is Simpson's paradox in a validation
+pipeline, and it is the same argument this project makes about single numbers,
+arriving uninvited in its own results.
+
+### Weather and lighting, which KITTI has no examples of
+
+| variant | Car AP | vs baseline |
+|---|---|---|
+| overcast | 0.360 | +0.010 |
+| clone (baseline) | 0.350 | - |
+| rain | 0.321 | -0.030 |
+| morning | 0.318 | -0.033 |
+| sunset | 0.299 | -0.051 |
+| **fog** | **0.228** | **-0.122** |
+
+Fog costs four times what rain does. Overcast is very slightly *better* than the
+baseline render. These are synthetic weather effects and are labelled as such:
+they are evidence about a renderer's fog, not about fog.
 
 ## The SOTIF taxonomy, and the gate under it
 

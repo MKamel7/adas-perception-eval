@@ -129,12 +129,13 @@ def main() -> int:
     # The shape question: does synthetic Car degrade with distance in the same
     # ORDER as real Car, even though the absolute numbers differ?
     if baseline:
-        real_distance = {}
+        real_distance, real_counts = {}, {}
         for item in real["slices"]:
             if item["dimension"] == "distance":
                 for cell in item["cells"]:
                     if cell["label"] == "Car" and cell["positives"] >= 10:
                         real_distance[item["bin"]] = cell["ap"]
+                        real_counts[item["bin"]] = cell["positives"]
         synthetic = {k: v["ap"] for k, v in baseline["slices"]["distance"].items()}
         shared = [b for b in real_distance if b in synthetic]
 
@@ -143,12 +144,37 @@ def main() -> int:
         for band in shared:
             print(f"{band:<12} {real_distance[band]:>8.3f} {synthetic[band]:>10.3f}")
 
+        # A binary "the orderings match" flag is too crude and was actively
+        # misleading here: it reported False because the two EASIEST bands
+        # swapped, while the hard end agreed exactly. Rank correlation says how
+        # much they agree, and the inversions say where they do not.
         real_order = sorted(shared, key=lambda b: real_distance[b])
         synth_order = sorted(shared, key=lambda b: synthetic[b])
-        agrees = real_order == synth_order
-        print(f"\nWorst-to-best ordering agrees: {agrees}")
+        n = len(shared)
+        squared = sum((real_order.index(b) - synth_order.index(b)) ** 2
+                      for b in shared)
+        rho = 1 - 6 * squared / (n * (n * n - 1)) if n > 1 else float("nan")
+        inversions = [b for b in shared
+                      if real_order.index(b) != synth_order.index(b)]
+
+        print(f"\nRank correlation of difficulty ordering: {rho:.3f}")
         print(f"  real:      {' < '.join(real_order)}")
         print(f"  synthetic: {' < '.join(synth_order)}")
+        print(f"  disagrees only on: {', '.join(inversions) or 'nothing'}")
+
+        # The composition check, which is what makes the aggregate comparison a
+        # trap. Two datasets can agree band by band and disagree wildly overall
+        # purely because one of them puts most of its objects in the hard bands.
+        real_total = sum(real_counts.values())
+        synth_total = sum(v["n"] for v in baseline["slices"]["distance"].values())
+        print(f"\n{'band':<10} {'real share':>11} {'synthetic share':>16}")
+        for band in shared:
+            print(f"{band:<10} {real_counts[band] / real_total:>10.1%} "
+                  f"{baseline['slices']['distance'][band]['n'] / synth_total:>15.1%}")
+        print(f"\noverall Car AP: real {real['overall']['Car']:.3f}, "
+              f"synthetic {baseline['overall']:.3f}")
+        print("If those two disagree while the bands agree, the difference is "
+              "COMPOSITION and not behaviour.")
 
     args.out.write_text(json.dumps({
         "no_pedestrians_in_simulation": True,
