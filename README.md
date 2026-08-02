@@ -72,6 +72,20 @@ Car spreads 5.7x between its best slice and its worst. The spec predicted 2x to
 3x before running, so the prediction understated the effect; that is recorded
 here rather than quietly updated.
 
+## The showcase
+
+`outputs/p3-showcase.mp4` is 55 seconds covering the whole argument in the order
+that makes it mean something: the aggregate shown once so it can be set aside,
+the spread, the recall ceiling no threshold reaches, the price of buying recall,
+the split between missed and mislocated, and the simulation that has no
+pedestrians to be blind to.
+
+**Every figure in it is read from `outputs/` at render time.** Nothing is typed
+in, including the counts on the closing card, so a re-run that moves a number
+moves the video with it and a video that disagrees with the evaluation cannot be
+produced. `outputs/p3-demo.mp4` is the shorter 21 s piece on the distance
+finding alone.
+
 ## Why calibration is in a 2D detection benchmark
 
 Because KITTI annotates each object twice, in two different spaces: a 3D position
@@ -145,7 +159,7 @@ the measurement path may import it, or the validation would be circular.
 | M5 | Sim-to-real | **done.** Six renders of Scene01, rank correlation 0.943 against real, and the finding below |
 | M6 | Taxonomy | **done.** Six triggering conditions, three hazards, seven demonstrating tests, gated in both directions |
 | M7 | Report | **done.** One command produces `outputs/report.html` |
-| M8 | Demo and README | **done.** Example frames rendered by rule, README and CV bullet below |
+| M8 | Demo and README | **done.** A 55 s showcase covering every finding, a 21 s distance scene, example frames chosen by rule, README and CV bullet below |
 
 ### Which model, and what does the smaller one cost?
 

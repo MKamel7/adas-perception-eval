@@ -20,6 +20,7 @@ outputs/*
 !outputs/sim_to_real.json
 !outputs/models.json
 !outputs/p3-demo.mp4
+!outputs/p3-showcase.mp4
 !outputs/examples/
 outputs/examples/*
 !outputs/examples/*.png
