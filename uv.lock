@@ -43,7 +43,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fault-injection-harness", marker = "extra == 'traceability'", editable = "../fault-injection-harness" },
+    { name = "fault-injection-harness", marker = "extra == 'traceability'", git = "https://github.com/MKamel7/fault-injection-harness?rev=v0.4.0" },
     { name = "jinja2", marker = "extra == 'report'", specifier = ">=3.1" },
     { name = "numpy", marker = "extra == 'infer'", specifier = ">=1.26" },
     { name = "onnxruntime", marker = "extra == 'infer'", specifier = ">=1.18" },
@@ -409,28 +409,10 @@ source = { git = "https://github.com/MKamel7/embedded-test-automation?rev=v3.1#0
 [[package]]
 name = "fault-injection-harness"
 version = "0.3.0"
-source = { editable = "../fault-injection-harness" }
+source = { git = "https://github.com/MKamel7/fault-injection-harness?rev=v0.4.0#329182d9d71e95a88ae833e1e5cac46bce586e60" }
 dependencies = [
     { name = "embedded-test-automation" },
     { name = "pyyaml" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "embedded-test-automation", git = "https://github.com/MKamel7/embedded-test-automation?rev=v3.1" },
-    { name = "pyyaml", specifier = ">=6.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "hypothesis", specifier = ">=6.100" },
-    { name = "matplotlib", specifier = ">=3.8" },
-    { name = "mypy", specifier = ">=1.11" },
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "pytest-cov", specifier = ">=5.0" },
-    { name = "pytest-html", specifier = ">=4.0" },
-    { name = "ruff", specifier = ">=0.6" },
-    { name = "types-pyyaml", specifier = ">=6.0" },
 ]
 
 [[package]]

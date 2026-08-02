@@ -30,12 +30,12 @@ export = [
 # time. It lives in the fault injection harness because that is where it was
 # built and attacked; the virtual production cell imports the same thing.
 #
-# SOURCED FROM A LOCAL CHECKOUT below, not from the git tag, because v0.4.0 is
-# not pushed yet. That is a temporary state and it is written down rather than
-# left as a resolution failure for whoever clones this next: replace the
-# [tool.uv.sources] entry with the tag and nothing else changes.
+# Pinned to a tag, not a branch. The gate defines what counts as a gap in the
+# safety argument, so a change to it changes what this project considers
+# verified; that must be a deliberate version bump rather than something that
+# arrives on the next clone.
 traceability = [
-    "fault-injection-harness",
+    "fault-injection-harness @ git+https://github.com/MKamel7/fault-injection-harness@v0.4.0",
 ]
 
 [dependency-groups]
@@ -50,6 +50,14 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+# The traceability gate is pulled from a git tag, which hatchling calls a direct
+# reference and refuses by default. Allowed deliberately: the alternative is
+# publishing the harness to an index, which is a lot of ceremony for one
+# consumer, or vendoring the gate, which is the duplication it was extracted to
+# remove.
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ape"]
@@ -81,6 +89,3 @@ packages = ["ape"]
 [tool.coverage.run]
 branch = true
 source = ["src/ape"]
-
-[tool.uv.sources]
-fault-injection-harness = { path = "../fault-injection-harness", editable = true }
