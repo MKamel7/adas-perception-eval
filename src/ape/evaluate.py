@@ -16,10 +16,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ape.classes import EVALUATED, HEADLINE, neutral_labels
-from ape.match import Assignment, assign, at_difficulty, in_slice
+from ape.match import Assignment, assign, assign_by_frame, at_difficulty, in_slice
 from ape.metrics import Curve, average_precision, mean_average_precision
 from ape.records import Detection, Difficulty, GroundTruth
 from ape.slices import DIMENSIONS
+from ape.uncertainty import Interval, bootstrap
 
 #: The operating point everything is reported at. KITTI's 2D benchmark uses 0.7
 #: for Car and 0.5 for pedestrians and cyclists; a single threshold is used here
@@ -34,15 +35,21 @@ class Cell:
 
     label: str
     curve: Curve
+    #: The 95% bootstrap interval, or None when it was not computed.
+    #:
+    #: This is what replaced counting objects as the measure of confidence. A
+    #: floor of ten objects was a proxy for "is this number stable", and a
+    #: crude one: ten objects in ten frames and ten objects in one frame are
+    #: not equally informative, and the object count cannot tell them apart.
+    interval: Interval | None = None
 
     @property
     def trustworthy(self) -> bool:
         """Enough objects for the number to mean anything.
 
-        Ten is not a deep statistical claim, it is a floor: below it a single
-        object moves AP by more than a tenth, and a report that presents such a
-        cell next to one computed from four hundred objects, in the same
-        typeface, is inviting a false comparison.
+        Kept as a coarse floor for the cells where no interval was computed.
+        Where an interval exists, its WIDTH is the honest answer and this is
+        only a fallback.
         """
         return self.curve.positives >= 10
 
@@ -63,6 +70,7 @@ class Evaluation:
     frames: int = 0
     objects: int = 0
     overall: dict[str, Curve] = field(default_factory=dict)
+    overall_interval: dict[str, Interval] = field(default_factory=dict)
     by_difficulty: dict[str, dict[str, Curve]] = field(default_factory=dict)
     slices: list[SliceResult] = field(default_factory=list)
 
@@ -99,6 +107,8 @@ def evaluate(detections: dict[str, list[Detection]],
         neutral = neutral_labels(label)
         result.overall[label] = average_precision(
             assign(detections, truth, label, neutral, iou))
+        result.overall_interval[label] = bootstrap(
+            assign_by_frame(detections, truth, label, neutral, iou))
 
         for tier in (Difficulty.EASY, Difficulty.MODERATE, Difficulty.HARD):
             result.by_difficulty.setdefault(tier.value, {})[label] = \
@@ -109,10 +119,18 @@ def evaluate(detections: dict[str, list[Detection]],
         for name in dimension.bins:
             cells = []
             for label in EVALUATED:
-                assignment: Assignment = assign(
-                    detections, truth, label, neutral_labels(label), iou,
-                    in_slice(dimension.of, str(name)))
-                cells.append(Cell(label, average_precision(assignment)))
+                predicate = in_slice(dimension.of, str(name))
+                per_frame = assign_by_frame(detections, truth, label,
+                                            neutral_labels(label), iou, predicate)
+                assignment = Assignment()
+                for piece in per_frame.values():
+                    assignment.extend(piece)
+                # Only where there is something to be uncertain about. A slice
+                # with no objects has no AP, so it has no interval either.
+                interval = (bootstrap({k: v for k, v in per_frame.items()
+                                       if v.positives or v.scored})
+                            if assignment.positives else None)
+                cells.append(Cell(label, average_precision(assignment), interval))
             result.slices.append(SliceResult(dimension.name, dimension.question,
                                              str(name), tuple(cells)))
     return result

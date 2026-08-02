@@ -54,6 +54,7 @@ th:first-child, td:first-child { text-align:left; }
 thead th { color:var(--dim); font-weight:500; font-size:.8rem; }
 td.thin { color:var(--dim); }
 td.thin::after { content:" ~"; }
+.ci { display:block; font-size:.72rem; color:var(--dim); letter-spacing:.01em; }
 .bar { display:inline-block; height:.5rem; border-radius:.25rem;
        background:var(--good); vertical-align:middle; margin-right:.4rem; }
 .note { border-left:3px solid var(--line); padding:.1rem 0 .1rem 1rem;
@@ -62,7 +63,15 @@ td.thin::after { content:" ~"; }
 """
 
 
-def _cell(ap: float, positives: int, trustworthy: bool) -> str:
+def _cell(ap: float, positives: int, trustworthy: bool,
+          interval: object = None) -> str:
+    """One number, with the range the resampling put around it.
+
+    The interval is the point of this column, not decoration. Without it a
+    reader compares 0.007 against 0.001 and cannot tell whether the difference
+    survives the sample, which is the question that decides whether either
+    number is worth acting on.
+    """
     if not positives:
         return '<td class="thin">-</td>'
     if ap != ap:
@@ -70,7 +79,11 @@ def _cell(ap: float, positives: int, trustworthy: bool) -> str:
     width = max(1, round(ap * 60))
     bar = f'<span class="bar" style="width:{width}px"></span>'
     klass = ' class="thin"' if not trustworthy else ""
-    return f"<td{klass}>{bar}{ap:.3f}</td>"
+    band = ""
+    if interval is not None and interval.low == interval.low:  # type: ignore[attr-defined]
+        band = (f'<span class="ci">{interval.low:.3f}-'  # type: ignore[attr-defined]
+                f'{interval.high:.3f}</span>')  # type: ignore[attr-defined]
+    return f"<td{klass}>{bar}{ap:.3f}{band}</td>"
 
 
 def render(result: Evaluation, header: Header) -> str:
@@ -109,7 +122,8 @@ def render(result: Evaluation, header: Header) -> str:
                 + "<th>objects</th></tr></thead><tbody>")
     total_positives = sum(result.overall[c].positives for c in EVALUATED)
     rows.append("<tr><td>all</td>" + "".join(
-        _cell(result.overall[c].average_precision, result.overall[c].positives, True)
+        _cell(result.overall[c].average_precision, result.overall[c].positives,
+              True, result.overall_interval.get(c))
         for c in EVALUATED) + f"<td>{total_positives}</td></tr>")
     for tier, classes in result.by_difficulty.items():
         objects = sum(classes[c].positives for c in EVALUATED)
@@ -129,13 +143,20 @@ def render(result: Evaluation, header: Header) -> str:
         for item in (s for s in result.slices if s.dimension == dimension.name):
             objects = sum(c.curve.positives for c in item.cells)
             rows.append(f"<tr><td>{e(item.bin)}</td>" + "".join(
-                _cell(c.curve.average_precision, c.curve.positives, c.trustworthy)
+                _cell(c.curve.average_precision, c.curve.positives,
+                      c.trustworthy, c.interval)
                 for c in item.cells) + f"<td>{objects}</td></tr>")
         rows.append("</tbody></table></div>")
 
-    rows.append('<div class="note">A tilde marks a cell computed from fewer '
-                'than ten objects. It is shown rather than hidden, and should '
-                'not be compared with a cell computed from hundreds.</div>')
+    rows.append('<div class="note">The small figures under each number are a '
+                '95% confidence interval from resampling FRAMES, not objects: '
+                'people standing in one group are not independent observations, '
+                'and resampling objects would understate the range. Two cells '
+                'whose intervals do not overlap differ by more than the sample '
+                'explains. Two whose intervals DO overlap are not thereby shown '
+                'to be the same, which is a weaker statement than it looks. '
+                'A tilde still marks a cell computed from fewer than ten '
+                'objects.</div>')
 
     rows.append('<h2>What this does not claim</h2><div class="note">'
                 'Cyclist is reported but excluded from the headline: KITTI '

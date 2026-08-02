@@ -49,6 +49,15 @@ result:
 | >50 m | 0.172 | **0.000** |
 | largely occluded | 0.250 | 0.023 |
 
+Every figure carries a **95% confidence interval from bootstrapping frames**,
+not objects: people standing in one group are not independent observations, and
+resampling objects would understate the range. Car overall is 0.754 [0.743,
+0.769]; Pedestrian is 0.495 [0.457, 0.536]. The headline claim is tested against
+its own uncertainty rather than asserted: the 0-10 m and 30-40 m pedestrian
+intervals do not overlap, so the difference is more than the sample explains.
+Overlapping intervals are *not* evidence of no difference, and the report says
+so rather than letting an overlap read as a null result.
+
 Distance here is **depth along the optical axis**, not radial distance to the
 object. That is the quantity time-to-collision depends on, and the choice
 matters: 9.7% of pedestrians would fall in a different band under the other
@@ -118,7 +127,9 @@ coverage measures which lines ran, not which situations were imagined.
 | Inference | ONNX Runtime, CPU | PyTorch. ONNX is what ships to embedded automotive targets, it is several times faster on CPU, and the export step is itself the industry-relevant part |
 | Detector | pretrained YOLOv8, exported | training anything. The point is the harness, and a model trained on KITTI would only inflate the score |
 | Metric reference | `pycocotools` | trusting my own mAP. The comparison **is** the deliverable |
-| Report | Jinja2 to a self-contained HTML file | a dashboard or a notebook. No server, no build step, the artifact is committed and readable |
+| Report | a self-contained HTML file | a dashboard or a notebook. No server, no build step, the artifact is committed and readable |
+| Uncertainty | frame-level bootstrap, 400 resamples | an object count. Ten objects in ten frames and ten in one frame are not equally informative and a count cannot tell them apart |
+| CI | ruff, mypy strict, full suite at 90% coverage, traceability gate | nothing. CI cannot run the evaluation, since the data is 20 GB, and a workflow claiming otherwise would be lying |
 
 `pycocotools` is a dependency of the **tests**, never of the pipeline. Nothing in
 the measurement path may import it, or the validation would be circular.

@@ -147,6 +147,23 @@ def assign_frame(detections: list[Detection], ground_truth: list[GroundTruth],
     return result
 
 
+def assign_by_frame(detections: dict[str, list[Detection]],
+                    ground_truth: dict[str, list[GroundTruth]],
+                    label: str, neutral: frozenset[str], iou_threshold: float,
+                    counts_when: Predicate | None = None
+                    ) -> dict[str, Assignment]:
+    """The same work as `assign`, kept per frame instead of summed.
+
+    The frame is the unit that was sampled from the world, so it is the unit the
+    bootstrap in `ape.uncertainty` resamples. Summing first throws that
+    structure away, and resampling objects instead would treat twelve people
+    standing in one group as twelve independent observations.
+    """
+    return {frame_id: assign_frame(detections.get(frame_id, []), truths,
+                                   label, neutral, iou_threshold, counts_when)
+            for frame_id, truths in ground_truth.items()}
+
+
 def assign(detections: dict[str, list[Detection]],
            ground_truth: dict[str, list[GroundTruth]],
            label: str, neutral: frozenset[str], iou_threshold: float,
@@ -159,7 +176,7 @@ def assign(detections: dict[str, list[Detection]],
     everything it looked at as one that found everything.
     """
     total = Assignment()
-    for frame_id, truths in ground_truth.items():
-        total.extend(assign_frame(detections.get(frame_id, []), truths,
-                                  label, neutral, iou_threshold, counts_when))
+    for piece in assign_by_frame(detections, ground_truth, label, neutral,
+                                 iou_threshold, counts_when).values():
+        total.extend(piece)
     return total

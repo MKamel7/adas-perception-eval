@@ -69,11 +69,14 @@ def main() -> int:
     result = evaluate(detections, truth, IOU)
 
     print(f"\nframes {result.frames}, objects {result.objects}, IoU {IOU}")
-    print(f"{'class':<12} {'AP':>8} {'positives':>10} {'recall':>8}")
+    print(f"{'class':<12} {'AP':>8} {'95% interval':>18} {'positives':>10} "
+          f"{'recall':>8}")
     for label in EVALUATED:
         curve = result.overall[label]
-        marker = "" if label in HEADLINE else "   (mapping-limited)"
-        print(f"{label:<12} {curve.average_precision:>8.4f} "
+        ci = result.overall_interval.get(label)
+        band = f"[{ci.low:.3f}, {ci.high:.3f}]" if ci else ""
+        marker = "" if label in HEADLINE else "  (mapping-limited)"
+        print(f"{label:<12} {curve.average_precision:>8.4f} {band:>18} "
               f"{curve.positives:>10} {curve.best_recall:>8.3f}{marker}")
     print(f"\nheadline mAP over {', '.join(HEADLINE)}: {result.headline:.4f}")
 
@@ -95,13 +98,18 @@ def main() -> int:
         "objects": result.objects, "iou": IOU,
         "headline_map": result.headline,
         "overall": {k: v.average_precision for k, v in result.overall.items()},
+        "overall_ci": {k: [v.low, v.high]
+                       for k, v in result.overall_interval.items()},
         "by_difficulty": {tier: {k: v.average_precision for k, v in cls.items()}
                           for tier, cls in result.by_difficulty.items()},
         "slices": [{"dimension": s.dimension, "bin": s.bin,
                     "cells": [{"label": c.label,
                                "ap": c.curve.average_precision,
                                "positives": c.curve.positives,
-                               "trustworthy": c.trustworthy}
+                               "trustworthy": c.trustworthy,
+                               "ci_low": c.interval.low if c.interval else None,
+                               "ci_high": c.interval.high if c.interval else None,
+                               "frames": c.interval.frames if c.interval else 0}
                               for c in s.cells]}
                    for s in result.slices],
     }, indent=2), encoding="utf-8")

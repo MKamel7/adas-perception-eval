@@ -162,6 +162,66 @@ def test_the_cyclist_number_is_reported_and_disclaimed() -> None:
     assert "Cyclist" not in HEADLINE, "and must not be averaged into the headline"
 
 
+# --- do the claims survive their own uncertainty? ----------------------------
+def interval(data: dict, dimension: str, bin_name: str, label: str
+             ) -> tuple[float, float] | None:
+    for item in data["slices"]:
+        if item["dimension"] == dimension and item["bin"] == bin_name:
+            for cell in item["cells"]:
+                if cell["label"] == label and cell["ci_low"] is not None:
+                    return (float(cell["ci_low"]), float(cell["ci_high"]))
+    return None
+
+
+@pytest.mark.demonstrates("TC-01")
+def test_the_distance_claim_is_not_explained_by_sampling() -> None:
+    """The point of computing intervals at all.
+
+    TC-01 says near and far pedestrians are different, not merely differently
+    averaged. If the confidence intervals overlapped, that wording would be
+    unsupported and the condition would have to be softened to "the point
+    estimates differ". They do not overlap, by a wide margin, so the claim
+    stands as written.
+    """
+    data = results()
+    near = interval(data, "distance", "0-10 m", "Pedestrian")
+    far = interval(data, "distance", "30-40 m", "Pedestrian")
+
+    assert near and far, "no intervals in results.json; re-run scripts/evaluate.py"
+    assert far[1] < near[0], (
+        f"the 30-40 m interval {far} overlaps the 0-10 m interval {near}, so "
+        f"the difference is not established and TC-01 overstates the evidence")
+
+
+@pytest.mark.demonstrates("TC-02")
+def test_the_occlusion_claim_is_not_explained_by_sampling() -> None:
+    data = results()
+    visible = interval(data, "occlusion", "fully visible", "Pedestrian")
+    largely = interval(data, "occlusion", "largely occluded", "Pedestrian")
+
+    assert visible and largely
+    assert largely[1] < visible[0], (
+        f"largely occluded {largely} overlaps fully visible {visible}")
+
+
+def test_a_thin_slice_reports_a_wide_interval() -> None:
+    """The interval has to be doing work, not decorating.
+
+    A cell computed from a handful of objects must come with a visibly wider
+    range than one computed from thousands, or the column is telling the reader
+    nothing they could not get from the object count.
+    """
+    data = results()
+    thin = interval(data, "box height", "0-25 px", "Pedestrian")
+    thick = interval(data, "distance", "0-10 m", "Car")
+
+    assert thin and thick
+    assert (thin[1] - thin[0]) >= 0.0, "an interval cannot be negative"
+    assert (thick[1] - thick[0]) < 0.15, (
+        f"the Car 0-10 m interval is {thick[1] - thick[0]:.3f} wide over "
+        f"hundreds of objects, which is too wide to be believable")
+
+
 # --- every number in the file, not a hand-picked two -------------------------
 def evidence_entries() -> list[tuple[str, dict]]:
     return [(c["id"], e) for c in analysis()["conditions"] for e in c["evidence"]]

@@ -1,0 +1,70 @@
+name: verify
+
+# WHAT CI CAN AND CANNOT DO HERE, stated because a workflow that claimed more
+# would be lying. KITTI is 12 GB and Virtual KITTI 2 is another 7.5, so nothing
+# here evaluates a dataset. What it runs is the part that must be right whatever
+# data is used: the metric implementation against pycocotools, the matching
+# rules, the class mapping, and the traceability gate over the SOTIF argument.
+#
+# The evaluation-dependent tests skip themselves when outputs/results.json is
+# absent. That file IS committed, so they run; if it were ever removed they
+# would go quiet rather than fail, which is why the last job asserts it is
+# present and that the taxonomy still matches it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: lint + types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Lint (ruff)
+        run: uv run --group dev ruff check .
+      - name: Type check (mypy strict)
+        run: uv run --all-extras --group dev mypy
+
+  metrics:
+    name: metrics against the reference
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      # The gate the project lives or dies on: our average precision against
+      # pycocotools on identical inputs, and a companion test that breaks the
+      # matcher on purpose to prove the comparison can fail.
+      - name: Full suite
+        run: >
+          uv run --extra reference --extra infer --extra traceability
+          --group dev pytest -q
+          --cov --cov-report=term-missing --cov-fail-under=90
+
+  argument:
+    name: SOTIF argument has no gaps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Results are committed
+        # Without this the evidence tests skip silently and the job goes green
+        # having checked nothing.
+        run: test -f outputs/results.json
+      - name: Traceability, both directions
+        run: >
+          uv run --extra traceability --group dev
+          python scripts/check_conditions.py
+      - name: The generated matrix is not stale
+        run: git diff --exit-code -- outputs/traceability.md
