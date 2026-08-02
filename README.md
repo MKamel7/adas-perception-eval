@@ -41,13 +41,13 @@ result:
 | easy | 0.937 | 0.686 |
 | moderate | 0.880 | 0.593 |
 | hard | 0.765 | 0.517 |
-| 0-10 m | 0.902 | 0.709 |
-| 10-20 m | 0.802 | 0.372 |
-| 20-30 m | 0.652 | 0.076 |
-| 30-40 m | 0.514 | **0.010** |
-| 40-50 m | 0.336 | **0.002** |
+| 0-10 m | 0.866 | 0.709 |
+| 10-20 m | 0.793 | 0.352 |
+| 20-30 m | 0.668 | 0.077 |
+| 30-40 m | 0.501 | **0.009** |
+| 40-50 m | 0.326 | **0.001** |
 | >50 m | 0.164 | **0.000** |
-| largely occluded | 0.249 | 0.025 |
+| largely occluded | 0.267 | 0.026 |
 
 Every figure carries a **95% confidence interval from bootstrapping frames**,
 not objects: people standing in one group are not independent observations, and
@@ -64,7 +64,7 @@ matters: 9.7% of pedestrians would fall in a different band under the other
 definition, so it is stated rather than left implicit.
 
 **A pedestrian detector reported at 0.506 is effectively blind beyond 30 metres.**
-Not degraded, blind: AP 0.010 over 371 objects, and 0.000 beyond 50 m. At 50 km/h a
+Not degraded, blind: AP 0.009 at 30-40 m, and 0.000 beyond 50 m. At 50 km/h a
 car covers 30 m in about two seconds. That is the finding, and no aggregate
 number contains it.
 
@@ -344,7 +344,7 @@ that a number was low.
 
 | | Condition | Evidence |
 |---|---|---|
-| TC-01 | Pedestrian beyond ~30 m | AP 0.709 → 0.372 → 0.076 → 0.010 → 0.000 by range |
+| TC-01 | Pedestrian beyond ~30 m | AP 0.709 → 0.352 → 0.077 → 0.009 → 0.000 by range |
 | TC-02 | Occlusion, the strongest predictor measured | Pedestrian 0.642 → 0.188 → 0.023 |
 | TC-03 | Small apparent size, independent of range | Pedestrian under 40 px: 0.005 |
 | TC-04 | Vehicles beyond 50 m | Car 0.900 → 0.172 |
