@@ -41,15 +41,55 @@ PARTS = {
 EXPECTED_TRAINING_FRAMES = 7481
 
 
-def download(archive: str, into: Path) -> Path:
+def download(archive: str, into: Path, expected: int) -> Path:
+    """Fetch, or resume a partial fetch, and never hand back a short file.
+
+    The first version of this skipped the download whenever the file existed,
+    which is the exact failure the module docstring warns about: an interrupted
+    12 GB transfer leaves a plausible-looking zip, the next run trusts it, and
+    the evaluation quietly proceeds over whatever fraction arrived. That is not
+    hypothetical either, it happened on the first attempt here.
+
+    Resuming rather than restarting because at this size a dropped connection is
+    routine, and re-fetching 3 GB that are already on disk to get the next 9 is
+    a bad trade.
+    """
     target = into / archive
-    if target.exists():
-        print(f"  {archive} already present, skipping download")
+    have = target.stat().st_size if target.exists() else 0
+
+    if have == expected:
+        print(f"  {archive} already complete, skipping")
         return target
+    if have > expected:
+        raise SystemExit(
+            f"{target} is {have} bytes but should be {expected}. Refusing to "
+            f"guess what it is; delete it and run again.")
+
     url = f"{BASE}/{archive}"
-    print(f"  downloading {url}")
-    with urllib.request.urlopen(url) as response, target.open("wb") as out:
-        shutil.copyfileobj(response, out)
+    request = urllib.request.Request(url)
+    mode = "wb"
+    if have:
+        print(f"  resuming {archive} at {have / 1e9:.2f} GB of {expected / 1e9:.2f} GB")
+        request.add_header("Range", f"bytes={have}-")
+        mode = "ab"
+    else:
+        print(f"  downloading {url}")
+
+    with urllib.request.urlopen(request) as response:
+        if have and response.status != 206:
+            # The server ignored the range and is sending the whole file from
+            # the start. Appending that to what is already there would produce
+            # a corrupt archive of exactly the right-looking size.
+            print("  server does not support resuming, restarting the download")
+            mode, have = "wb", 0
+        with target.open(mode) as out:
+            shutil.copyfileobj(response, out)
+
+    got = target.stat().st_size
+    if got != expected:
+        raise SystemExit(
+            f"{archive} is {got} bytes, expected {expected}. The transfer was "
+            f"cut short; run again to resume rather than extracting this.")
     return target
 
 
@@ -70,20 +110,31 @@ def main() -> int:
     parser.add_argument("--data", type=Path, default=Path("data"))
     parser.add_argument("--keep-archives", action="store_true",
                         help="do not delete the zips after extracting")
+    parser.add_argument("--only", choices=sorted(PARTS),
+                        help="fetch just one part, for resuming a long transfer "
+                             "without re-extracting the small ones")
     args = parser.parse_args()
 
     args.data.mkdir(parents=True, exist_ok=True)
-    wanted = ["labels", "calib"] + (["images"] if args.images else [])
+    if args.only:
+        wanted = [args.only]
+    else:
+        wanted = ["labels", "calib"] + (["images"] if args.images else [])
 
     for name in wanted:
         archive, size, must_contain = PARTS[name]
-        print(f"{name} (about {size / 1e6:.0f} MB)")
-        path = download(archive, args.data)
+        print(f"{name} (about {size / 1e6:.0f} MB)", flush=True)
+        path = download(archive, args.data, size)
         extract(path, args.data, must_contain)
         if not args.keep_archives:
             path.unlink()
 
-    frames = len(list((args.data / "training" / "label_2").glob("*.txt")))
+    labels = args.data / "training" / "label_2"
+    if not labels.is_dir():
+        print(f"\n{args.only or 'requested parts'} ready under {args.data}/training")
+        return 0
+
+    frames = len(list(labels.glob("*.txt")))
     if frames != EXPECTED_TRAINING_FRAMES:
         raise SystemExit(
             f"got {frames} label files, expected {EXPECTED_TRAINING_FRAMES}. "

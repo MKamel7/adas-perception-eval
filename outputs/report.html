@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ADAS perception evaluation</title><style>
+:root { --ink:#16181d; --dim:#666e7a; --line:#e2e5ea; --bg:#fff;
+        --warn:#8a5a00; --bad:#a4243b; --good:#1c6b4a; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#e8eaee; --dim:#98a1ad; --line:#2a2f38; --bg:#14161a;
+          --warn:#e0a63c; --bad:#ef7a8c; --good:#5fd0a0; } }
+* { box-sizing:border-box; }
+body { margin:0; padding:2.5rem 1.25rem 5rem; background:var(--bg); color:var(--ink);
+       font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+main { max-width:70rem; margin:0 auto; }
+h1 { font-size:1.6rem; margin:0 0 .25rem; letter-spacing:-.01em; }
+h2 { font-size:1.15rem; margin:2.75rem 0 .4rem; letter-spacing:-.01em; }
+p.sub { color:var(--dim); margin:0 0 2rem; }
+p.q { color:var(--dim); margin:.1rem 0 .8rem; font-style:italic; }
+.meta { color:var(--dim); font-size:.85rem; border-top:1px solid var(--line);
+        padding-top:1rem; margin-top:3rem; }
+.headline { display:flex; gap:2.5rem; flex-wrap:wrap; align-items:baseline;
+            border:1px solid var(--line); border-radius:.5rem; padding:1rem 1.25rem; }
+.headline b { font-size:1.5rem; font-weight:600; }
+.headline span { color:var(--dim); font-size:.85rem; display:block; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; font-size:.9rem; min-width:34rem; }
+th,td { text-align:right; padding:.4rem .6rem; border-bottom:1px solid var(--line);
+        font-variant-numeric:tabular-nums; }
+th:first-child, td:first-child { text-align:left; }
+thead th { color:var(--dim); font-weight:500; font-size:.8rem; }
+td.thin { color:var(--dim); }
+td.thin::after { content:" ~"; }
+.bar { display:inline-block; height:.5rem; border-radius:.25rem;
+       background:var(--good); vertical-align:middle; margin-right:.4rem; }
+.note { border-left:3px solid var(--line); padding:.1rem 0 .1rem 1rem;
+        color:var(--dim); margin:1rem 0; }
+.bad { color:var(--bad); } .warn { color:var(--warn); }
+</style></head><body><main><h1>ADAS perception evaluation</h1>
+<p class="sub">yolov8s.onnx on 1500 KITTI frames, 7945 annotated objects, IoU 0.5. Pretrained COCO weights; nothing was trained.</p>
+<div class="headline">
+<div><b>0.625</b><span>mAP over Car, Pedestrian</span></div>
+<div><b>5.5x</b><span>Car spread, worst 0.172 at distance: &gt;50 m</span></div>
+<div><b>10229.8x</b><span>Pedestrian spread, worst 0.000 at box height: 0-25 px</span></div>
+</div>
+<div class="note">The aggregate above is the least informative number on this page. Everything below is the same detections cut along attributes the benchmark annotated before anyone saw a result.</div>
+<h2>Overall, and by the benchmark's own difficulty</h2>
+<div class="scroll"><table><thead><tr><th>subset</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
+<tr><td>all</td><td><span class="bar" style="width:45px"></span>0.754</td><td><span class="bar" style="width:30px"></span>0.495</td><td><span class="bar" style="width:1px"></span>0.006</td><td>6813</td></tr>
+<tr><td>easy</td><td><span class="bar" style="width:56px"></span>0.938</td><td><span class="bar" style="width:41px"></span>0.691</td><td><span class="bar" style="width:1px"></span>0.004</td><td>1772</td></tr>
+<tr><td>moderate</td><td><span class="bar" style="width:53px"></span>0.882</td><td><span class="bar" style="width:36px"></span>0.594</td><td><span class="bar" style="width:1px"></span>0.004</td><td>4018</td></tr>
+<tr><td>hard</td><td><span class="bar" style="width:46px"></span>0.772</td><td><span class="bar" style="width:30px"></span>0.501</td><td><span class="bar" style="width:1px"></span>0.006</td><td>5296</td></tr>
+</tbody></table></div>
+<h2>By difficulty</h2>
+<p class="q">Does the benchmark&#x27;s own notion of difficulty predict failure?</p>
+<div class="scroll"><table><thead><tr><th>difficulty</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
+<tr><td>easy</td><td><span class="bar" style="width:56px"></span>0.938</td><td><span class="bar" style="width:41px"></span>0.691</td><td><span class="bar" style="width:1px"></span>0.004</td><td>1772</td></tr>
+<tr><td>moderate</td><td><span class="bar" style="width:47px"></span>0.784</td><td><span class="bar" style="width:11px"></span>0.178</td><td><span class="bar" style="width:1px"></span>0.002</td><td>2246</td></tr>
+<tr><td>hard</td><td><span class="bar" style="width:20px"></span>0.338</td><td><span class="bar" style="width:2px"></span>0.035</td><td><span class="bar" style="width:1px"></span>0.007</td><td>1278</td></tr>
+<tr><td>ignored</td><td><span class="bar" style="width:32px"></span>0.540</td><td><span class="bar" style="width:9px"></span>0.148</td><td><span class="bar" style="width:1px"></span>0.002</td><td>1517</td></tr>
+</tbody></table></div>
+<h2>By occlusion</h2>
+<p class="q">How much of the object may be hidden before it is missed?</p>
+<div class="scroll"><table><thead><tr><th>occlusion</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
+<tr><td>fully visible</td><td><span class="bar" style="width:53px"></span>0.887</td><td><span class="bar" style="width:39px"></span>0.642</td><td><span class="bar" style="width:1px"></span>0.003</td><td>3405</td></tr>
+<tr><td>partly occluded</td><td><span class="bar" style="width:39px"></span>0.655</td><td><span class="bar" style="width:11px"></span>0.188</td><td><span class="bar" style="width:1px"></span>0.005</td><td>1854</td></tr>
+<tr><td>largely occluded</td><td><span class="bar" style="width:15px"></span>0.250</td><td><span class="bar" style="width:1px"></span>0.023</td><td class="thin"><span class="bar" style="width:1px"></span>0.002</td><td>1295</td></tr>
+<tr><td>unknown</td><td><span class="bar" style="width:35px"></span>0.586</td><td class="thin"><span class="bar" style="width:18px"></span>0.295</td><td><span class="bar" style="width:1px"></span>0.001</td><td>259</td></tr>
+</tbody></table></div>
+<h2>By truncation</h2>
+<p class="q">Does an object leaving the frame stop being detected?</p>
+<div class="scroll"><table><thead><tr><th>truncation</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
+<tr><td>none</td><td><span class="bar" style="width:44px"></span>0.736</td><td><span class="bar" style="width:29px"></span>0.479</td><td><span class="bar" style="width:1px"></span>0.002</td><td>5958</td></tr>
+<tr><td>0-15%</td><td><span class="bar" style="width:45px"></span>0.746</td><td><span class="bar" style="width:31px"></span>0.522</td><td class="thin"><span class="bar" style="width:2px"></span>0.037</td><td>135</td></tr>
+<tr><td>15-30%</td><td><span class="bar" style="width:43px"></span>0.724</td><td><span class="bar" style="width:11px"></span>0.187</td><td class="thin"><span class="bar" style="width:1px"></span>0.003</td><td>107</td></tr>
+<tr><td>30-50%</td><td><span class="bar" style="width:44px"></span>0.726</td><td class="thin"><span class="bar" style="width:6px"></span>0.103</td><td class="thin"><span class="bar" style="width:1px"></span>0.013</td><td>131</td></tr>
+<tr><td>&gt;50%</td><td><span class="bar" style="width:43px"></span>0.724</td><td><span class="bar" style="width:10px"></span>0.169</td><td><span class="bar" style="width:1px"></span>0.002</td><td>482</td></tr>
+</tbody></table></div>
+<h2>By distance</h2>
+<p class="q">At what range does the detector stop seeing things?</p>
+<div class="scroll"><table><thead><tr><th>distance</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
+<tr><td>0-10 m</td><td><span class="bar" style="width:52px"></span>0.862</td><td><span class="bar" style="width:41px"></span>0.689</td><td><span class="bar" style="width:1px"></span>0.021</td><td>1037</td></tr>
+<tr><td>10-20 m</td><td><span class="bar" style="width:48px"></span>0.804</td><td><span class="bar" style="width:22px"></span>0.361</td><td><span class="bar" style="width:1px"></span>0.002</td><td>1745</td></tr>
+<tr><td>20-30 m</td><td><span class="bar" style="width:39px"></span>0.656</td><td><span class="bar" style="width:4px"></span>0.069</td><td><span class="bar" style="width:1px"></span>0.000</td><td>1520</td></tr>
+<tr><td>30-40 m</td><td><span class="bar" style="width:31px"></span>0.518</td><td><span class="bar" style="width:1px"></span>0.007</td><td><span class="bar" style="width:1px"></span>0.000</td><td>1101</td></tr>
+<tr><td>40-50 m</td><td><span class="bar" style="width:20px"></span>0.341</td><td><span class="bar" style="width:1px"></span>0.001</td><td><span class="bar" style="width:1px"></span>0.000</td><td>739</td></tr>
+<tr><td>&gt;50 m</td><td><span class="bar" style="width:10px"></span>0.172</td><td><span class="bar" style="width:1px"></span>0.000</td><td><span class="bar" style="width:1px"></span>0.000</td><td>671</td></tr>
+</tbody></table></div>
+<h2>By box height</h2>
+<p class="q">Is it distance that matters, or simply apparent size?</p>
+<div class="scroll"><table><thead><tr><th>box height</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
+<tr><td>0-25 px</td><td><span class="bar" style="width:15px"></span>0.244</td><td><span class="bar" style="width:1px"></span>0.000</td><td><span class="bar" style="width:1px"></span>0.000</td><td>863</td></tr>
+<tr><td>25-40 px</td><td><span class="bar" style="width:33px"></span>0.546</td><td><span class="bar" style="width:1px"></span>0.005</td><td><span class="bar" style="width:1px"></span>0.000</td><td>1635</td></tr>
+<tr><td>40-80 px</td><td><span class="bar" style="width:43px"></span>0.720</td><td><span class="bar" style="width:9px"></span>0.144</td><td><span class="bar" style="width:1px"></span>0.000</td><td>2289</td></tr>
+<tr><td>80-160 px</td><td><span class="bar" style="width:49px"></span>0.824</td><td><span class="bar" style="width:29px"></span>0.477</td><td><span class="bar" style="width:1px"></span>0.010</td><td>1296</td></tr>
+<tr><td>&gt;160 px</td><td><span class="bar" style="width:52px"></span>0.873</td><td><span class="bar" style="width:41px"></span>0.676</td><td><span class="bar" style="width:1px"></span>0.011</td><td>730</td></tr>
+</tbody></table></div>
+<h2>By position</h2>
+<p class="q">Are objects at the edge of the field of view treated worse?</p>
+<div class="scroll"><table><thead><tr><th>position</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
+<tr><td>left third</td><td><span class="bar" style="width:43px"></span>0.715</td><td><span class="bar" style="width:24px"></span>0.392</td><td><span class="bar" style="width:1px"></span>0.000</td><td>1972</td></tr>
+<tr><td>centre third</td><td><span class="bar" style="width:42px"></span>0.705</td><td><span class="bar" style="width:20px"></span>0.334</td><td><span class="bar" style="width:1px"></span>0.001</td><td>3777</td></tr>
+<tr><td>right third</td><td><span class="bar" style="width:41px"></span>0.680</td><td><span class="bar" style="width:24px"></span>0.399</td><td><span class="bar" style="width:1px"></span>0.011</td><td>1064</td></tr>
+</tbody></table></div>
+<div class="note">A tilde marks a cell computed from fewer than ten objects. It is shown rather than hidden, and should not be compared with a cell computed from hundreds.</div>
+<h2>What this does not claim</h2><div class="note">Cyclist is reported but excluded from the headline: KITTI annotates a rider and bicycle as one box and a COCO detector emits two, so that number measures box convention as much as detection. The IoU threshold is 0.5 for every class, where KITTI's own benchmark uses 0.7 for Car. Average precision follows COCO 101-point interpolation, not KITTI 40-point, so these figures are not directly comparable to the KITTI leaderboard. SOTIF vocabulary is borrowed; its process is not performed and no compliance is claimed.</div>
+<p class="meta">Generated 2026-08-02 01:46 UTC from 1500 frames, 000000 to 001499, detections kept above score 0.05. The mAP implementation is checked against pycocotools to within 0.001 by the test suite.</p></main></body></html>

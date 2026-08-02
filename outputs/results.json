@@ -1,0 +1,679 @@
+{
+  "model": "yolov8s.onnx",
+  "frames": 1500,
+  "objects": 7945,
+  "iou": 0.5,
+  "headline_map": 0.6248120591976953,
+  "overall": {
+    "Car": 0.7542207792748816,
+    "Pedestrian": 0.49540333912050905,
+    "Cyclist": 0.005824770479132025
+  },
+  "by_difficulty": {
+    "easy": {
+      "Car": 0.9382337580499291,
+      "Pedestrian": 0.6905783655882832,
+      "Cyclist": 0.0035630729317851647
+    },
+    "moderate": {
+      "Car": 0.8820408196623165,
+      "Pedestrian": 0.5938819378239043,
+      "Cyclist": 0.004180313719134745
+    },
+    "hard": {
+      "Car": 0.7717159567338923,
+      "Pedestrian": 0.5013063167757814,
+      "Cyclist": 0.005679044669574725
+    }
+  },
+  "slices": [
+    {
+      "dimension": "difficulty",
+      "bin": "easy",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.9382337580499291,
+          "positives": 1174,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.6905783655882832,
+          "positives": 464,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0035630729317851647,
+          "positives": 134,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "difficulty",
+      "bin": "moderate",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.7840484341813158,
+          "positives": 1913,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.1784166296646116,
+          "positives": 237,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0019980069596769413,
+          "positives": 96,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "difficulty",
+      "bin": "hard",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.33839444455660994,
+          "positives": 1114,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.034698653949642215,
+          "positives": 152,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.006930693069306932,
+          "positives": 12,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "difficulty",
+      "bin": "ignored",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.5403098831671111,
+          "positives": 1378,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.14790152485849975,
+          "positives": 40,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0017183409790793207,
+          "positives": 99,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "occlusion",
+      "bin": "fully visible",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.8869723645106179,
+          "positives": 2666,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.6422611355072494,
+          "positives": 531,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.002970907043001495,
+          "positives": 208,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "occlusion",
+      "bin": "partly occluded",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.6552928459731341,
+          "positives": 1591,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.1877829583172746,
+          "positives": 210,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.004789322244351991,
+          "positives": 53,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "occlusion",
+      "bin": "largely occluded",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.2503401711628575,
+          "positives": 1141,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.023412313228115197,
+          "positives": 145,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.001885902876001886,
+          "positives": 9,
+          "trustworthy": false
+        }
+      ]
+    },
+    {
+      "dimension": "occlusion",
+      "bin": "unknown",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.5858556711563518,
+          "positives": 181,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.29488448844884485,
+          "positives": 7,
+          "trustworthy": false
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0012744760828440162,
+          "positives": 71,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "truncation",
+      "bin": "none",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.7362474485706066,
+          "positives": 4823,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.47894984651201844,
+          "positives": 828,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0024959984052548467,
+          "positives": 307,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "truncation",
+      "bin": "0-15%",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.7457185877766628,
+          "positives": 107,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.522341760623656,
+          "positives": 22,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0374037403740374,
+          "positives": 6,
+          "trustworthy": false
+        }
+      ]
+    },
+    {
+      "dimension": "truncation",
+      "bin": "15-30%",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.7236835696951225,
+          "positives": 87,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.18664284031672762,
+          "positives": 11,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0025279123657046556,
+          "positives": 9,
+          "trustworthy": false
+        }
+      ]
+    },
+    {
+      "dimension": "truncation",
+      "bin": "30-50%",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.725896196813602,
+          "positives": 119,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.10297029702970298,
+          "positives": 8,
+          "trustworthy": false
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.012871287128712872,
+          "positives": 4,
+          "trustworthy": false
+        }
+      ]
+    },
+    {
+      "dimension": "truncation",
+      "bin": ">50%",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.7243286952483138,
+          "positives": 443,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.16884593948139803,
+          "positives": 24,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0017222458961905433,
+          "positives": 15,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "distance",
+      "bin": "0-10 m",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.861687194494197,
+          "positives": 713,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.6892142673958962,
+          "positives": 273,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.021216149319091444,
+          "positives": 51,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "distance",
+      "bin": "10-20 m",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.8035375346048513,
+          "positives": 1280,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.3611722558439752,
+          "positives": 360,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0018217102550831036,
+          "positives": 105,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "distance",
+      "bin": "20-30 m",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.6556280586533018,
+          "positives": 1292,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.0690475245440299,
+          "positives": 149,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0001380989162746062,
+          "positives": 79,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "distance",
+      "bin": "30-40 m",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.5178761438960608,
+          "positives": 971,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.007096083674543321,
+          "positives": 74,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0,
+          "positives": 56,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "distance",
+      "bin": "40-50 m",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.34132294356342613,
+          "positives": 686,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.000999258882995112,
+          "positives": 21,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0,
+          "positives": 32,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "distance",
+      "bin": ">50 m",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.17186807253631078,
+          "positives": 637,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.00048221240628720883,
+          "positives": 16,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0,
+          "positives": 18,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "box height",
+      "bin": "0-25 px",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.24384551126215484,
+          "positives": 834,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 6.75067506750675e-05,
+          "positives": 12,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0,
+          "positives": 17,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "box height",
+      "bin": "25-40 px",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.5463965791945317,
+          "positives": 1481,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.004723793009950569,
+          "positives": 73,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0,
+          "positives": 81,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "box height",
+      "bin": "40-80 px",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.7202142226407818,
+          "positives": 1859,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.14423874403010148,
+          "positives": 294,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.00012207401942565128,
+          "positives": 136,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "box height",
+      "bin": "80-160 px",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.8244736736548431,
+          "positives": 891,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.4766553314919154,
+          "positives": 338,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.009826639425904414,
+          "positives": 67,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "box height",
+      "bin": ">160 px",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.8730506833393403,
+          "positives": 514,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.6758421550130855,
+          "positives": 176,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.01123078566974082,
+          "positives": 40,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "position",
+      "bin": "left third",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.7152638723007191,
+          "positives": 1702,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.39235402474796194,
+          "positives": 209,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.00044590219155042805,
+          "positives": 61,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "position",
+      "bin": "centre third",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.7048845290506663,
+          "positives": 3143,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.3340460741853358,
+          "positives": 458,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.0007511988671848124,
+          "positives": 176,
+          "trustworthy": true
+        }
+      ]
+    },
+    {
+      "dimension": "position",
+      "bin": "right third",
+      "cells": [
+        {
+          "label": "Car",
+          "ap": 0.6802277566331821,
+          "positives": 734,
+          "trustworthy": true
+        },
+        {
+          "label": "Pedestrian",
+          "ap": 0.3993039537141694,
+          "positives": 226,
+          "trustworthy": true
+        },
+        {
+          "label": "Cyclist",
+          "ap": 0.010579271556912382,
+          "positives": 104,
+          "trustworthy": true
+        }
+      ]
+    }
+  ]
+}

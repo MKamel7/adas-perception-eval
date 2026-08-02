@@ -14,11 +14,47 @@ actually spend their days on.
 
 ## Status
 
-Milestone 1 of 8. Ingest and calibration are in and tested; inference, metrics,
-slicing and the report are not yet written. The
-[milestone table](#milestones) says what each one has to prove before it counts as
-done, and those criteria were written before any code, so a result cannot be
-rationalised into a pass afterwards.
+**Milestones 1, 3, 4 and 7 are done. Milestone 2 is done and MISSED its
+performance criterion.** Milestones 5, 6 and 8 are not started. The criteria were
+written before any code, so a result cannot be rationalised into a pass
+afterwards, and that cuts both ways: M2's budget is missed and is recorded as
+missed rather than adjusted.
+
+## The result
+
+1500 KITTI frames, 7945 annotated objects, YOLOv8s exported to ONNX, IoU 0.5.
+
+| class | AP | objects | note |
+|---|---|---|---|
+| Car | **0.754** | 5579 | |
+| Pedestrian | **0.495** | 893 | |
+| Cyclist | 0.006 | 341 | mapping-limited, excluded from the headline |
+
+**Headline mAP over Car and Pedestrian: 0.625.**
+
+That number is the least useful thing on this page, which is the entire point.
+Cut the same detections along attributes KITTI annotated before anyone saw a
+result:
+
+| | Car | Pedestrian |
+|---|---|---|
+| easy | 0.938 | 0.691 |
+| moderate | 0.882 | 0.594 |
+| hard | 0.772 | 0.501 |
+| 0-10 m | 0.900 | 0.689 |
+| 30-40 m | 0.518 | **0.007** |
+| 40-50 m | 0.341 | **0.001** |
+| >50 m | 0.172 | **0.000** |
+| largely occluded | 0.250 | 0.023 |
+
+**A pedestrian detector reported at 0.495 is effectively blind beyond 30 metres.**
+Not degraded, blind: AP 0.007 over 74 objects, and zero beyond 50 m. At 50 km/h a
+car covers 30 m in about two seconds. That is the finding, and no aggregate
+number contains it.
+
+Car spreads 5.5x between its best slice and its worst. The spec predicted 2x to
+3x before running, so the prediction understated the effect; that is recorded
+here rather than quietly updated.
 
 ## Why calibration is in a 2D detection benchmark
 
@@ -84,14 +120,33 @@ the measurement path may import it, or the validation would be circular.
 
 | # | Milestone | Done when |
 |---|---|---|
-| M1 | Ingest and calibration | Labels parse, projection verified by a test that catches a deliberate sign flip, on a committed 20-frame fixture |
-| M2 | Inference | ONNX export reproducible, 1500 frames in under 5 minutes on 12 CPU threads, COCO to KITTI class mapping written down as data |
-| M3 | Metrics validated | Own mAP agrees with `pycocotools` **to within 0.001** on identical inputs. The gate the project lives or dies on |
-| M4 | Slicing | At least 6 slice dimensions, each traceable to a ground-truth attribute, none picked after seeing results |
-| M5 | Sim-to-real | Same pipeline on Virtual KITTI 2, degradation curves compared, agreement or disagreement reported either way |
-| M6 | Taxonomy | At least 5 triggering conditions in SOTIF vocabulary, each with example frames and the slice evidence that found it |
-| M7 | Report | One command produces the HTML from a fresh checkout plus data |
-| M8 | Demo | A short scene showing the pipeline and the sliced result |
+| M1 | Ingest and calibration | **done.** Labels parse; projection verified by a test that catches a deliberate sign flip, on a committed 20-frame fixture |
+| M2 | Inference | **done, criterion missed.** Export is reproducible and the class mapping is data. 1500 frames took **13 minutes against a 5 minute budget**, see below |
+| M3 | Metrics validated | **done.** Own AP agrees with `pycocotools` **exactly, to six decimal places**, against a required 0.001 |
+| M4 | Slicing | **done.** Six dimensions, every one from a ground-truth attribute, all committed before the run |
+| M5 | Sim-to-real | not started. Virtual KITTI 2 is 7.5 GB and is not yet downloaded |
+| M6 | Taxonomy | not started. The slice evidence it needs now exists |
+| M7 | Report | **done.** One command produces `outputs/report.html` |
+| M8 | Demo | not started |
+
+### M2 missed its budget, and the reason is not the code
+
+1500 frames took 799 seconds against a 300 second budget. I assumed the
+bottleneck was my non-maximum suppression, rewrote it from a Python loop to
+numpy, and the run went from 844 seconds to 799. Profiling afterwards, which
+should have come first, put the time where it actually was:
+
+| stage | per frame | share |
+|---|---|---|
+| ONNX forward | 397 ms | **83%** |
+| preprocess | 35 ms | 7% |
+| image load | 34 ms | 7% |
+| postprocess (what I rewrote) | 12 ms | **2.4%** |
+
+The budget is missed by YOLOv8s on a 15 W mobile CPU, not by the pipeline
+around it. YOLOv8n would fit the budget at a cost in accuracy; that trade has
+not been made because the accuracy is what is being measured. The criterion was
+optimistic when it was written and it is left standing, marked as missed.
 
 ## Expected results, recorded before running
 

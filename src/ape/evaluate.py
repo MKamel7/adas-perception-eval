@@ -1,0 +1,118 @@
+"""Run the whole evaluation: overall, per difficulty tier, and per slice.
+
+The aggregate number is computed first and then largely ignored, which is the
+argument this project is making. A detector reported at one number can be
+near-blind on a subset that matters, and the only way to know is to cut the same
+data along attributes the benchmark annotated before anyone saw a result.
+
+Every figure here comes out of the same `assign` and `average_precision` that
+`tests/test_metrics_against_reference.py` checks against pycocotools. There is
+no second implementation for slices, because a slice computed by different code
+than the aggregate would make any difference between them uninterpretable.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from ape.classes import EVALUATED, HEADLINE, neutral_labels
+from ape.match import Assignment, assign, at_difficulty, in_slice
+from ape.metrics import Curve, average_precision, mean_average_precision
+from ape.records import Detection, Difficulty, GroundTruth
+from ape.slices import DIMENSIONS
+
+#: The operating point everything is reported at. KITTI's 2D benchmark uses 0.7
+#: for Car and 0.5 for pedestrians and cyclists; a single threshold is used here
+#: so that classes are comparable with each other, and the difference from
+#: KITTI's convention is stated in the report rather than left to be discovered.
+IOU = 0.5
+
+
+@dataclass(frozen=True)
+class Cell:
+    """One number, and enough context to know whether to believe it."""
+
+    label: str
+    curve: Curve
+
+    @property
+    def trustworthy(self) -> bool:
+        """Enough objects for the number to mean anything.
+
+        Ten is not a deep statistical claim, it is a floor: below it a single
+        object moves AP by more than a tenth, and a report that presents such a
+        cell next to one computed from four hundred objects, in the same
+        typeface, is inviting a false comparison.
+        """
+        return self.curve.positives >= 10
+
+
+@dataclass(frozen=True)
+class SliceResult:
+    dimension: str
+    question: str
+    bin: str
+    cells: tuple[Cell, ...]
+
+    def cell(self, label: str) -> Cell | None:
+        return next((c for c in self.cells if c.label == label), None)
+
+
+@dataclass
+class Evaluation:
+    frames: int = 0
+    objects: int = 0
+    overall: dict[str, Curve] = field(default_factory=dict)
+    by_difficulty: dict[str, dict[str, Curve]] = field(default_factory=dict)
+    slices: list[SliceResult] = field(default_factory=list)
+
+    @property
+    def headline(self) -> float:
+        return mean_average_precision(
+            {k: v for k, v in self.overall.items() if k in HEADLINE})
+
+    def spread(self, label: str) -> tuple[float, float, str, str]:
+        """Best and worst trustworthy slice for a class, and where they were.
+
+        The headline finding of the whole project is this ratio, not the
+        aggregate, so it is computed rather than eyeballed off a table.
+        """
+        found = [(s, c) for s in self.slices
+                 if (c := s.cell(label)) and c.trustworthy
+                 and c.curve.average_precision == c.curve.average_precision]
+        if not found:
+            return (float("nan"), float("nan"), "", "")
+        best = max(found, key=lambda pair: pair[1].curve.average_precision)
+        worst = min(found, key=lambda pair: pair[1].curve.average_precision)
+        return (best[1].curve.average_precision, worst[1].curve.average_precision,
+                f"{best[0].dimension}: {best[0].bin}",
+                f"{worst[0].dimension}: {worst[0].bin}")
+
+
+def evaluate(detections: dict[str, list[Detection]],
+             truth: dict[str, list[GroundTruth]],
+             iou: float = IOU) -> Evaluation:
+    result = Evaluation(frames=len(truth),
+                        objects=sum(len(v) for v in truth.values()))
+
+    for label in EVALUATED:
+        neutral = neutral_labels(label)
+        result.overall[label] = average_precision(
+            assign(detections, truth, label, neutral, iou))
+
+        for tier in (Difficulty.EASY, Difficulty.MODERATE, Difficulty.HARD):
+            result.by_difficulty.setdefault(tier.value, {})[label] = \
+                average_precision(assign(detections, truth, label, neutral, iou,
+                                         at_difficulty(tier)))
+
+    for dimension in DIMENSIONS:
+        for name in dimension.bins:
+            cells = []
+            for label in EVALUATED:
+                assignment: Assignment = assign(
+                    detections, truth, label, neutral_labels(label), iou,
+                    in_slice(dimension.of, str(name)))
+                cells.append(Cell(label, average_precision(assignment)))
+            result.slices.append(SliceResult(dimension.name, dimension.question,
+                                             str(name), tuple(cells)))
+    return result

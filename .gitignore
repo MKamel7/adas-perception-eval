@@ -9,8 +9,13 @@ models/
 *.onnx
 *.pt
 
-# Generated reports. The one committed artifact is written out explicitly.
-outputs/
+# Generated outputs. The REPORT is committed on purpose: the milestone is "one
+# command produces the HTML", and an artifact nobody can open without running
+# the pipeline first is not a deliverable. The detection cache is not: it is
+# megabytes of intermediate that regenerates from the model and the split.
+outputs/*
+!outputs/report.html
+!outputs/results.json
 
 __pycache__/
 *.py[cod]

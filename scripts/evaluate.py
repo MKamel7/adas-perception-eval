@@ -1,0 +1,115 @@
+"""Evaluate the cached detections and write the report.
+
+    uv run --extra report python scripts/evaluate.py
+
+One command, from a fresh checkout plus data, to a self-contained HTML file that
+can be committed and opened without a server. No notebook, no dashboard, no
+build step: the artifact IS the deliverable and a reader should not have to run
+anything to see it.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from ape.cache import load_detections  # noqa: E402
+from ape.classes import EVALUATED, HEADLINE  # noqa: E402
+from ape.evaluate import IOU, evaluate  # noqa: E402
+from ape.kitti import frame_ids, load_labels  # noqa: E402
+from ape.report import render  # noqa: E402
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--detections", type=Path,
+                        default=ROOT / "outputs/detections.jsonl")
+    parser.add_argument("--labels", type=Path, default=ROOT / "data/training/label_2")
+    parser.add_argument("--out", type=Path, default=ROOT / "outputs/report.html")
+    parser.add_argument("--json", type=Path, default=ROOT / "outputs/results.json")
+    args = parser.parse_args()
+
+    header, detections = load_detections(args.detections)
+    print(f"{header.model}, {header.frames} frames, "
+          f"score >= {header.score_threshold}")
+
+    # The SPLIT, reconstructed the same way run_inference.py chose it, and not
+    # the set of frames that happen to appear in the cache.
+    #
+    # Taking the frames from the detections is the obvious shortcut and it is
+    # wrong: a frame where the detector found nothing at all has no entry in the
+    # cache, so it silently leaves the evaluation, and every object in it leaves
+    # the recall denominator with it. A detector that returns nothing on the
+    # hardest frames would then be rewarded for it. This cost two frames and
+    # 0.0008 of Car AP before it was caught.
+    split = frame_ids(args.labels)[:header.frames]
+    if len(split) != header.frames:
+        raise SystemExit(
+            f"the cache says {header.frames} frames but only {len(split)} are "
+            f"available under {args.labels}")
+    truth = {frame: load_labels(args.labels / f"{frame}.txt") for frame in split}
+
+    missing = sorted(set(detections) - set(truth))
+    if missing:
+        raise SystemExit(
+            f"{len(missing)} frames have detections but are outside the split "
+            f"({missing[:3]}...). The cache and the labels disagree about what "
+            f"was evaluated.")
+    silent = sorted(set(truth) - set(detections))
+    if silent:
+        print(f"  {len(silent)} frames produced no detections at all "
+              f"({', '.join(silent[:4])}); they are evaluated as misses, "
+              f"not dropped")
+
+    result = evaluate(detections, truth, IOU)
+
+    print(f"\nframes {result.frames}, objects {result.objects}, IoU {IOU}")
+    print(f"{'class':<12} {'AP':>8} {'positives':>10} {'recall':>8}")
+    for label in EVALUATED:
+        curve = result.overall[label]
+        marker = "" if label in HEADLINE else "   (mapping-limited)"
+        print(f"{label:<12} {curve.average_precision:>8.4f} "
+              f"{curve.positives:>10} {curve.best_recall:>8.3f}{marker}")
+    print(f"\nheadline mAP over {', '.join(HEADLINE)}: {result.headline:.4f}")
+
+    for label in HEADLINE:
+        best, worst, where_best, where_worst = result.spread(label)
+        if best == best:
+            # A ratio against a slice that scored zero is not a number, it is a
+            # division artefact. "10229x" was printed once and means nothing
+            # beyond "the worst slice found nothing at all", which is the more
+            # useful sentence anyway.
+            spread = (f"spread {best / worst:.1f}x" if worst > 0.005
+                      else "the worst slice found essentially nothing")
+            print(f"  {label}: best {best:.3f} ({where_best}), "
+                  f"worst {worst:.3f} ({where_worst}), {spread}")
+
+    args.json.parent.mkdir(parents=True, exist_ok=True)
+    args.json.write_text(json.dumps({
+        "model": header.model, "frames": result.frames,
+        "objects": result.objects, "iou": IOU,
+        "headline_map": result.headline,
+        "overall": {k: v.average_precision for k, v in result.overall.items()},
+        "by_difficulty": {tier: {k: v.average_precision for k, v in cls.items()}
+                          for tier, cls in result.by_difficulty.items()},
+        "slices": [{"dimension": s.dimension, "bin": s.bin,
+                    "cells": [{"label": c.label,
+                               "ap": c.curve.average_precision,
+                               "positives": c.curve.positives,
+                               "trustworthy": c.trustworthy}
+                              for c in s.cells]}
+                   for s in result.slices],
+    }, indent=2), encoding="utf-8")
+
+    args.out.write_text(render(result, header), encoding="utf-8")
+    print(f"\nwrote {args.out}\nwrote {args.json}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
