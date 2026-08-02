@@ -49,6 +49,11 @@ result:
 | >50 m | 0.172 | **0.000** |
 | largely occluded | 0.250 | 0.023 |
 
+Distance here is **depth along the optical axis**, not radial distance to the
+object. That is the quantity time-to-collision depends on, and the choice
+matters: 9.7% of pedestrians would fall in a different band under the other
+definition, so it is stated rather than left implicit.
+
 **A pedestrian detector reported at 0.495 is effectively blind beyond 30 metres.**
 Not degraded, blind: AP 0.007 over 74 objects, and zero beyond 50 m. At 50 km/h a
 car covers 30 m in about two seconds. That is the finding, and no aggregate

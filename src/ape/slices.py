@@ -101,6 +101,16 @@ DIMENSIONS: tuple[Dimension, ...] = (
     ),
     Dimension(
         name="distance",
+        # DEPTH ALONG THE OPTICAL AXIS, not radial distance to the object, and
+        # the difference is not negligible: 9.7% of pedestrians in this split
+        # would fall in a different band under the other definition, and the
+        # worst case differs by 7.2 m for an object 21.9 m off to the side.
+        #
+        # Depth is the right choice here because it is the quantity that decides
+        # time to collision on a straight path, which is what an ADAS function
+        # acts on. Radial distance is what the phrase "how far away" suggests in
+        # conversation, so the choice is stated rather than left to be inferred
+        # from the fact that the code reads `location_cam[2]`.
         question="At what range does the detector stop seeing things?",
         bins=_bands(DISTANCE_EDGES, "m"),
         of=lambda gt: (None if gt.distance_m is None

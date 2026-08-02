@@ -13,8 +13,29 @@ Nothing here is staged. The frames are selected by the same rule the example
 stills use, the boxes are the real detector output at the same threshold, and
 the AP figures are read from outputs/results.json rather than typed in.
 
-Green is ground truth. Blue is a detection. Red is a ground-truth pedestrian
-that no detection matched.
+Green is a pedestrian in the captioned band that was found. Red is one that was
+not, annotated with the best overlap any detection achieved so a viewer can see
+WHY it counts as a miss. Blue is a detection. Grey is a pedestrian outside the
+captioned band, drawn faintly because it is in the frame but is not what this
+section is about.
+
+THREE THINGS THE FIRST VERSION GOT WRONG, all of which made the picture argue
+something different from the caption:
+
+  it drew every pedestrian in green regardless of band, so a frame captioned
+  "0-10 m" showed objects at 20-30 m as though they were part of the claim
+
+  it matched against every detection down to 0.05 confidence while drawing only
+  those above 0.25, so the verdict and the image rested on different evidence
+  and a box could be marked missed with a visible detection sitting on it
+
+  it never showed the overlap, so a near miss at IoU 0.41 and a total absence
+  looked identical
+
+The picture is now drawn at a single stated operating point and the matching
+uses exactly the detections that are visible. The AP in the caption is a
+different quantity, computed over the whole precision-recall curve, and the
+caption says so rather than letting the two be confused.
 """
 
 from __future__ import annotations
@@ -35,8 +56,9 @@ from ape.kitti import frame_ids, load_labels  # noqa: E402
 from ape.match import partition  # noqa: E402
 from ape.slices import dimension  # noqa: E402
 
-GREEN, RED, BLUE, INK, PAPER = ((60, 200, 120), (235, 60, 80), (70, 150, 245),
-                                (245, 246, 248), (18, 20, 24))
+GREEN, RED, BLUE, GREY, INK, PAPER = ((60, 200, 120), (235, 60, 80),
+                                      (70, 150, 245), (120, 126, 136),
+                                      (245, 246, 248), (18, 20, 24))
 
 #: Bands in the order the scene walks through them, near to far.
 BANDS = ("0-10 m", "10-20 m", "20-30 m", "30-40 m", "40-50 m", ">50 m")
@@ -56,7 +78,15 @@ def font(size: int):
     return ImageFont.load_default()
 
 
-def missed(truth, detections, label):
+def match(truth, detections, label):
+    """Which pedestrians were found, and the best overlap on each that was not.
+
+    Returns (found, missed) where missed carries the best IoU any visible
+    detection achieved on it. That number is the difference between "the
+    detector did not see this" and "the detector saw it and boxed it badly",
+    which are different failures with different fixes and looked identical in
+    the first version of this scene.
+    """
     counts, _ = partition(truth, label, neutral_labels(label), None)
     claimed: set[int] = set()
     for detection in sorted(detections, key=lambda d: d.score, reverse=True):
@@ -71,7 +101,12 @@ def missed(truth, detections, label):
                 best, index = overlap, i
         if index >= 0 and best >= IOU:
             claimed.add(index)
-    return [g for i, g in enumerate(counts) if i not in claimed]
+
+    found = [g for i, g in enumerate(counts) if i in claimed]
+    gone = [(g, max((d.box.iou(g.box) for d in detections
+                     if d.label == label), default=0.0))
+            for i, g in enumerate(counts) if i not in claimed]
+    return found, gone
 
 
 def main() -> int:
@@ -100,14 +135,19 @@ def main() -> int:
                     ap[item["bin"]] = cell["ap"]
 
     #: band -> frames containing the most pedestrians in that band, richest first
-    candidates: dict[str, list[tuple[int, str]]] = {b: [] for b in BANDS}
+    candidates: dict[str, list[tuple[float, int, str]]] = {b: [] for b in BANDS}
     for frame in split:
         truth = load_labels(args.data / "label_2" / f"{frame}.txt")
         for band in BANDS:
-            n = sum(1 for g in truth
-                    if g.label == "Pedestrian" and binner(g) == band)
-            if n:
-                candidates[band].append((n, frame))
+            peds = [g for g in truth if g.label == "Pedestrian"]
+            inside = sum(1 for g in peds if binner(g) == band)
+            outside = len(peds) - inside
+            if inside:
+                # Rank by how much of the frame is actually about this band.
+                # Ranking on the raw count picked busy frames full of
+                # pedestrians at every other distance, which is how a frame
+                # captioned "0-10 m" ended up showing objects at 20-30 m.
+                candidates[band].append((inside - 0.5 * outside, inside, frame))
     for band in BANDS:
         candidates[band].sort(reverse=True)
 
@@ -116,19 +156,23 @@ def main() -> int:
     for old in staging.glob("*.png"):
         old.unlink()
 
-    big, small = font(30), font(21)
+    big, small, tiny = font(30), font(21), font(15)
     index = 0
     for band in BANDS:
-        chosen = [f for _, f in candidates[band][:PER_BAND]]
+        chosen = [f for _, _, f in candidates[band][:PER_BAND]]
         if not chosen:
             print(f"  {band}: no frames, skipped")
             continue
         for frame in chosen:
             truth = load_labels(args.data / "label_2" / f"{frame}.txt")
-            found = [d for d in detections.get(frame, [])
-                     if d.score >= args.score and d.label == "Pedestrian"]
-            gone = [g for g in missed(truth, detections.get(frame, []), "Pedestrian")
-                    if binner(g) == band]
+            # ONE set of detections, used both for drawing and for deciding.
+            # Matching against everything down to 0.05 while drawing only what
+            # cleared 0.25 meant the verdict and the image rested on different
+            # evidence, so a box could be marked missed with a visible
+            # detection sitting on it.
+            visible = [d for d in detections.get(frame, [])
+                       if d.score >= args.score and d.label == "Pedestrian"]
+            found, gone = match(truth, visible, "Pedestrian")
 
             with Image.open(args.data / "image_2" / f"{frame}.png") as handle:
                 photo = handle.convert("RGB")
@@ -138,35 +182,70 @@ def main() -> int:
             # valid plane size. 375 + 96 = 471 fails; the image is padded to 376
             # rather than the bar being made 97, so the photo keeps a whole
             # number of pixels per source row.
-            canvas = Image.new("RGB", (1242, 376 + 96), PAPER)
+            canvas = Image.new("RGB", (1242, 376 + 100), PAPER)
             canvas.paste(photo.resize((1242, 376)), (0, 0))
             draw = ImageDraw.Draw(canvas)
 
+            # Out of band: in the frame, but not what this section claims.
+            # Drawing these in green was how a section captioned "0-10 m" ended
+            # up showing objects at 20-30 m as though they were part of it.
             for item in truth:
-                if item.label != "Pedestrian":
+                if item.label == "Pedestrian" and binner(item) != band:
+                    box = item.box
+                    draw.rectangle([box.x1, box.y1, box.x2, box.y2],
+                                   outline=GREY, width=1)
+
+            for detection in visible:
+                box = detection.box
+                draw.rectangle([box.x1, box.y1, box.x2, box.y2],
+                               outline=BLUE, width=2)
+
+            for item in found:
+                if binner(item) != band:
                     continue
                 box = item.box
                 draw.rectangle([box.x1, box.y1, box.x2, box.y2],
                                outline=GREEN, width=2)
-            for detection in found:
-                box = detection.box
-                draw.rectangle([box.x1, box.y1, box.x2, box.y2],
-                               outline=BLUE, width=2)
-            for item in gone:
+
+            for item, overlap in gone:
+                if binner(item) != band:
+                    continue
                 box = item.box
                 draw.rectangle([box.x1 - 3, box.y1 - 3, box.x2 + 3, box.y2 + 3],
                                outline=RED, width=3)
+                # Say WHY it is a miss. "Boxed at 0.41 where 0.50 was needed"
+                # and "nothing there at all" are different failures with
+                # different fixes, and they looked identical before.
+                note = f"{overlap:.2f} IoU" if overlap > 0.05 else "not seen"
+                # Below the box when there is no room above it, and pulled left
+                # of the right edge when the label would run off frame.
+                width = draw.textlength(note, font=tiny)
+                nx = min(max(2.0, box.x1 - 2), 1242 - width - 4)
+                ny = box.y1 - 18 if box.y1 > 20 else min(box.y2 + 3, 376 - 17)
+                draw.text((nx, ny), note, font=tiny, fill=RED)
 
             score = ap.get(band)
-            draw.text((22, 386), f"Pedestrians at {band}", font=big, fill=INK)
-            draw.text((22, 425),
-                      f"measured AP {score:.3f}" if score is not None else "",
+            bar = 376
+            draw.text((22, bar + 6), f"Pedestrians at {band}", font=big, fill=INK)
+            label = f"frame {frame}"
+            draw.text((1242 - 22 - draw.textlength(label, font=small), bar + 14),
+                      label, font=small, fill=(110, 116, 126))
+            in_band = sum(1 for g in truth
+                          if g.label == "Pedestrian" and binner(g) == band)
+            draw.text((22, bar + 46),
+                      (f"AP {score:.3f}    {in_band} in band"
+                       if score is not None else ""),
                       font=small, fill=RED if (score or 0) < 0.1 else INK)
-            draw.text((430, 425),
-                      "green: annotated    blue: detected    red: annotated, "
-                      "nothing found", font=small, fill=(150, 156, 166))
-            draw.text((980, 386), f"frame {frame}", font=small,
-                      fill=(150, 156, 166))
+            draw.text((330, bar + 46),
+                      "green found    red missed    blue detection    "
+                      "grey another band",
+                      font=small, fill=(150, 156, 166))
+            draw.text((22, bar + 74),
+                      f"boxes at confidence ≥ {args.score:g}; AP is over the "
+                      f"whole precision-recall curve; a red box shows the best "
+                      f"overlap achieved, {IOU:g} is needed",
+                      font=tiny, fill=(110, 116, 126))
+
 
             for _ in range(round(HOLD * args.fps)):
                 canvas.save(staging / f"{index:05d}.png")
