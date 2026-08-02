@@ -1,114 +1,114 @@
 {
   "model": "yolov8s.onnx",
-  "frames": 1500,
-  "objects": 7945,
+  "frames": 7481,
+  "objects": 40570,
   "iou": 0.5,
-  "headline_map": 0.6248120591976953,
+  "headline_map": 0.6299079080329035,
   "overall": {
-    "Car": 0.7542207792748816,
-    "Pedestrian": 0.49540333912050905,
-    "Cyclist": 0.005824770479132025
+    "Car": 0.7537621617019272,
+    "Pedestrian": 0.5060536543638797,
+    "Cyclist": 0.007519073206961369
   },
   "overall_ci": {
     "Car": [
-      0.7434328173573087,
-      0.7691156172203514
+      0.7502037888002608,
+      0.7620630974297097
     ],
     "Pedestrian": [
-      0.45698630911169585,
-      0.535867094553636
+      0.4875828894756974,
+      0.523162650748968
     ],
     "Cyclist": [
-      0.0019870052487269457,
-      0.015204965356070814
+      0.005170932037662191,
+      0.012747242738989435
     ]
   },
   "by_difficulty": {
     "easy": {
-      "Car": 0.9382337580499291,
-      "Pedestrian": 0.6905783655882832,
-      "Cyclist": 0.0035630729317851647
+      "Car": 0.9368629146226515,
+      "Pedestrian": 0.685929015448598,
+      "Cyclist": 0.005653763820127969
     },
     "moderate": {
-      "Car": 0.8820408196623165,
-      "Pedestrian": 0.5938819378239043,
-      "Cyclist": 0.004180313719134745
+      "Car": 0.8798402250109381,
+      "Pedestrian": 0.5933754747160839,
+      "Cyclist": 0.006161785599059156
     },
     "hard": {
-      "Car": 0.7717159567338923,
-      "Pedestrian": 0.5013063167757814,
-      "Cyclist": 0.005679044669574725
+      "Car": 0.7650483577504584,
+      "Pedestrian": 0.5165338319197754,
+      "Cyclist": 0.007079236405424916
     }
   },
   "ceiling_recall": {
-    "Car": 0.8184262412618749,
-    "Pedestrian": 0.6707726763717805,
-    "Cyclist": 0.06158357771260997
+    "Car": 0.8180015308607612,
+    "Pedestrian": 0.6873189213282817,
+    "Cyclist": 0.07682851874615858
   },
   "at_iou": {
     "0.3": {
-      "Car": 0.8517965024326172,
-      "Pedestrian": 0.5829619754339694,
-      "Cyclist": 0.0925914719916722
+      "Car": 0.8494410955835455,
+      "Pedestrian": 0.5963617827830086,
+      "Cyclist": 0.07532496732731472
     },
     "0.5": {
-      "Car": 0.7542207792748816,
-      "Pedestrian": 0.49540333912050905,
-      "Cyclist": 0.005824770479132025
+      "Car": 0.7537621617019272,
+      "Pedestrian": 0.5060536543638797,
+      "Cyclist": 0.007519073206961369
     },
     "0.7": {
-      "Car": 0.5324363495668822,
-      "Pedestrian": 0.271691698666781,
-      "Cyclist": 5.156765676567656e-05
+      "Car": 0.5253862780278983,
+      "Pedestrian": 0.26629409600690657,
+      "Cyclist": 4.541738577527478e-05
     }
   },
   "diagnosis": {
     "Car": {
-      "total": 5579,
-      "found": 4566,
-      "mislocated": 735,
-      "unseen": 278,
-      "mislocation_share": 0.7255676209279368
+      "total": 28742,
+      "found": 23511,
+      "mislocated": 3839,
+      "unseen": 1392,
+      "mislocation_share": 0.7338940929076658
     },
     "Pedestrian": {
-      "total": 893,
-      "found": 599,
-      "mislocated": 138,
-      "unseen": 156,
-      "mislocation_share": 0.46938775510204084
+      "total": 4487,
+      "found": 3084,
+      "mislocated": 682,
+      "unseen": 721,
+      "mislocation_share": 0.48610121168923737
     },
     "Cyclist": {
-      "total": 341,
-      "found": 21,
-      "mislocated": 65,
-      "unseen": 255,
-      "mislocation_share": 0.203125
+      "total": 1627,
+      "found": 125,
+      "mislocated": 286,
+      "unseen": 1216,
+      "mislocation_share": 0.1904127829560586
     }
   },
   "operating_points": {
     "Car": [
       {
         "target": 0.5,
-        "threshold": 0.67015,
-        "precision": 0.9555629802873371,
-        "false_alarms_per_frame": 0.08866666666666667,
-        "missed": 2719,
+        "threshold": 0.6811,
+        "precision": 0.9553712480252765,
+        "false_alarms_per_frame": 0.09062959497393397,
+        "missed": 14228,
         "reachable": true
       },
       {
         "target": 0.7,
-        "threshold": 0.43601,
-        "precision": 0.8501303214596003,
-        "false_alarms_per_frame": 0.46,
-        "missed": 1665,
+        "threshold": 0.413,
+        "precision": 0.8342365836762968,
+        "false_alarms_per_frame": 0.5437775698436038,
+        "missed": 8269,
         "reachable": true
       },
       {
         "target": 0.8,
-        "threshold": 0.13629,
-        "precision": 0.5707896754408383,
-        "false_alarms_per_frame": 2.239333333333333,
-        "missed": 1112,
+        "threshold": 0.12946,
+        "precision": 0.5630287027529216,
+        "false_alarms_per_frame": 2.3891191017243685,
+        "missed": 5713,
         "reachable": true
       },
       {
@@ -131,10 +131,10 @@
     "Pedestrian": [
       {
         "target": 0.5,
-        "threshold": 0.50192,
-        "precision": 0.6205962059620597,
-        "false_alarms_per_frame": 0.18666666666666668,
-        "missed": 435,
+        "threshold": 0.52195,
+        "precision": 0.6596119929453262,
+        "false_alarms_per_frame": 0.1547921400882235,
+        "missed": 2243,
         "reachable": true
       },
       {
@@ -220,30 +220,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.9382337580499291,
-          "positives": 1174,
+          "ap": 0.9368629146226515,
+          "positives": 5971,
           "trustworthy": true,
-          "ci_low": 0.9258041833073443,
-          "ci_high": 0.9516924824742562,
-          "frames": 1309
+          "ci_low": 0.9303587086393905,
+          "ci_high": 0.942987058967838,
+          "frames": 6563
         },
         {
           "label": "Pedestrian",
-          "ap": 0.6905783655882832,
-          "positives": 464,
+          "ap": 0.685929015448598,
+          "positives": 2310,
           "trustworthy": true,
-          "ci_low": 0.6486575861841488,
-          "ci_high": 0.7383151938664743,
-          "frames": 789
+          "ci_low": 0.6624374330726368,
+          "ci_high": 0.7112009271518663,
+          "frames": 3913
         },
         {
           "label": "Cyclist",
-          "ap": 0.0035630729317851647,
-          "positives": 134,
+          "ap": 0.005653763820127969,
+          "positives": 654,
           "trustworthy": true,
-          "ci_low": 0.00044083762000546035,
-          "ci_high": 0.013211152143773967,
-          "frames": 333
+          "ci_low": 0.0033814529240598717,
+          "ci_high": 0.011004884210712109,
+          "frames": 1602
         }
       ]
     },
@@ -253,30 +253,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.7840484341813158,
-          "positives": 1913,
+          "ap": 0.7790233376966981,
+          "positives": 9739,
           "trustworthy": true,
-          "ci_low": 0.7644059360716168,
-          "ci_high": 0.8043208233916316,
-          "frames": 1298
+          "ci_low": 0.7697732674062684,
+          "ci_high": 0.7884666306388213,
+          "frames": 6472
         },
         {
           "label": "Pedestrian",
-          "ap": 0.1784166296646116,
-          "positives": 237,
+          "ap": 0.2004392521635728,
+          "positives": 1259,
           "trustworthy": true,
-          "ci_low": 0.13212219915365472,
-          "ci_high": 0.23253274831721688,
-          "frames": 721
+          "ci_low": 0.174288141466523,
+          "ci_high": 0.2255428081758471,
+          "frames": 3669
         },
         {
           "label": "Cyclist",
-          "ap": 0.0019980069596769413,
-          "positives": 96,
+          "ap": 0.0013351825652948095,
+          "positives": 444,
           "trustworthy": true,
-          "ci_low": 0.0,
-          "ci_high": 0.012573361019318321,
-          "frames": 335
+          "ci_low": 0.0005128935004534087,
+          "ci_high": 0.003753732781726512,
+          "frames": 1622
         }
       ]
     },
@@ -286,30 +286,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.33839444455660994,
-          "positives": 1114,
+          "ap": 0.3519327705283678,
+          "positives": 6006,
           "trustworthy": true,
-          "ci_low": 0.30658287355285624,
-          "ci_high": 0.3758005602526583,
-          "frames": 1257
+          "ci_low": 0.3381151058213078,
+          "ci_high": 0.36722709165279815,
+          "frames": 6268
         },
         {
           "label": "Pedestrian",
-          "ap": 0.034698653949642215,
-          "positives": 152,
+          "ap": 0.04640397724859686,
+          "positives": 707,
           "trustworthy": true,
-          "ci_low": 0.01570881863291391,
-          "ci_high": 0.07547549675380834,
-          "frames": 724
+          "ci_low": 0.033538344693186464,
+          "ci_high": 0.06542695459681207,
+          "frames": 3603
         },
         {
           "label": "Cyclist",
-          "ap": 0.006930693069306932,
-          "positives": 12,
+          "ap": 0.0028758123867582155,
+          "positives": 96,
           "trustworthy": true,
-          "ci_low": 0.0,
-          "ci_high": 0.05117146788692025,
-          "frames": 286
+          "ci_low": 0.0004754620101487015,
+          "ci_high": 0.012572507108319676,
+          "frames": 1412
         }
       ]
     },
@@ -319,30 +319,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.5403098831671111,
-          "positives": 1378,
+          "ap": 0.5523858209707303,
+          "positives": 7026,
           "trustworthy": true,
-          "ci_low": 0.5121889440894785,
-          "ci_high": 0.5679641993795138,
-          "frames": 1314
+          "ci_low": 0.5410785774349471,
+          "ci_high": 0.5645386138897683,
+          "frames": 6512
         },
         {
           "label": "Pedestrian",
-          "ap": 0.14790152485849975,
-          "positives": 40,
+          "ap": 0.08632838120878161,
+          "positives": 211,
           "trustworthy": true,
-          "ci_low": 0.05119210007266157,
-          "ci_high": 0.27151150709714217,
-          "frames": 711
+          "ci_low": 0.05693960821760236,
+          "ci_high": 0.13527102247499667,
+          "frames": 3565
         },
         {
           "label": "Cyclist",
-          "ap": 0.0017183409790793207,
-          "positives": 99,
+          "ap": 0.0012789537883862356,
+          "positives": 433,
           "trustworthy": true,
-          "ci_low": 0.00011854092609086731,
-          "ci_high": 0.006644764515820658,
-          "frames": 332
+          "ci_low": 0.0004503807366400995,
+          "ci_high": 0.003460523923209119,
+          "frames": 1575
         }
       ]
     },
@@ -352,30 +352,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.8869723645106179,
-          "positives": 2666,
+          "ap": 0.8866022019910321,
+          "positives": 13457,
           "trustworthy": true,
-          "ci_low": 0.8771463493714716,
-          "ci_high": 0.8980624450479008,
-          "frames": 1378
+          "ci_low": 0.8823694236623856,
+          "ci_high": 0.8911913276629999,
+          "frames": 6858
         },
         {
           "label": "Pedestrian",
-          "ap": 0.6422611355072494,
-          "positives": 531,
+          "ap": 0.6496391389290734,
+          "positives": 2667,
           "trustworthy": true,
-          "ci_low": 0.5926425129812021,
-          "ci_high": 0.6892604704350895,
-          "frames": 796
+          "ci_low": 0.6304026494785713,
+          "ci_high": 0.6715912168648338,
+          "frames": 3964
         },
         {
           "label": "Cyclist",
-          "ap": 0.002970907043001495,
-          "positives": 208,
+          "ap": 0.004534154060372694,
+          "positives": 1010,
           "trustworthy": true,
-          "ci_low": 0.0005605474914333217,
-          "ci_high": 0.010031450353119569,
-          "frames": 375
+          "ci_low": 0.0029624766481422503,
+          "ci_high": 0.008351465828649504,
+          "frames": 1803
         }
       ]
     },
@@ -385,30 +385,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.6552928459731341,
-          "positives": 1591,
+          "ap": 0.6662515980249412,
+          "positives": 8184,
           "trustworthy": true,
-          "ci_low": 0.6262983074540787,
-          "ci_high": 0.6803786574619949,
-          "frames": 1272
+          "ci_low": 0.6537113132878429,
+          "ci_high": 0.6788791244571971,
+          "frames": 6339
         },
         {
           "label": "Pedestrian",
-          "ap": 0.1877829583172746,
-          "positives": 210,
+          "ap": 0.17762166596274193,
+          "positives": 1095,
           "trustworthy": true,
-          "ci_low": 0.1380760960529511,
-          "ci_high": 0.24915932564456156,
-          "frames": 717
+          "ci_low": 0.15317349881148434,
+          "ci_high": 0.2062264411792818,
+          "frames": 3635
         },
         {
           "label": "Cyclist",
-          "ap": 0.004789322244351991,
-          "positives": 53,
+          "ap": 0.0036041882971193104,
+          "positives": 255,
           "trustworthy": true,
-          "ci_low": 2.272138397830145e-05,
-          "ci_high": 0.027404353445246714,
-          "frames": 308
+          "ci_low": 0.0014139649712963847,
+          "ci_high": 0.009822221711748265,
+          "frames": 1500
         }
       ]
     },
@@ -418,30 +418,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.2503401711628575,
-          "positives": 1141,
+          "ap": 0.2665617474797669,
+          "positives": 6173,
           "trustworthy": true,
-          "ci_low": 0.22576703570441864,
-          "ci_high": 0.2856322423719256,
-          "frames": 1256
+          "ci_low": 0.2552297953584574,
+          "ci_high": 0.2824397040221251,
+          "frames": 6266
         },
         {
           "label": "Pedestrian",
-          "ap": 0.023412313228115197,
-          "positives": 145,
+          "ap": 0.025515240359663488,
+          "positives": 671,
           "trustworthy": true,
-          "ci_low": 0.010199812444809535,
-          "ci_high": 0.051275800579928775,
-          "frames": 724
+          "ci_low": 0.018396977613075956,
+          "ci_high": 0.03504209278149681,
+          "frames": 3606
         },
         {
           "label": "Cyclist",
-          "ap": 0.001885902876001886,
-          "positives": 9,
-          "trustworthy": false,
+          "ap": 9.78498866971463e-05,
+          "positives": 80,
+          "trustworthy": true,
           "ci_low": 0.0,
-          "ci_high": 0.012963546354635461,
-          "frames": 285
+          "ci_high": 0.0008374548540130405,
+          "frames": 1408
         }
       ]
     },
@@ -451,30 +451,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.5858556711563518,
-          "positives": 181,
+          "ap": 0.5545649239654525,
+          "positives": 928,
           "trustworthy": true,
-          "ci_low": 0.5065561017260211,
-          "ci_high": 0.6560910342685311,
-          "frames": 1257
+          "ci_low": 0.5201846547671316,
+          "ci_high": 0.5898443291045036,
+          "frames": 6243
         },
         {
           "label": "Pedestrian",
-          "ap": 0.29488448844884485,
-          "positives": 7,
-          "trustworthy": false,
-          "ci_low": 0.0028556225187736164,
-          "ci_high": 0.6537509520182787,
-          "frames": 708
+          "ap": 0.07265210431776746,
+          "positives": 54,
+          "trustworthy": true,
+          "ci_low": 0.030826628867409132,
+          "ci_high": 0.1445380540483278,
+          "frames": 3545
         },
         {
           "label": "Cyclist",
-          "ap": 0.0012744760828440162,
-          "positives": 71,
+          "ap": 0.0013413568878290207,
+          "positives": 282,
           "trustworthy": true,
-          "ci_low": 0.0,
-          "ci_high": 0.007299520434862827,
-          "frames": 317
+          "ci_low": 0.00039159578848466835,
+          "ci_high": 0.0035485509523662294,
+          "frames": 1493
         }
       ]
     },
@@ -484,30 +484,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.7362474485706066,
-          "positives": 4823,
+          "ap": 0.7335847855966587,
+          "positives": 24675,
           "trustworthy": true,
-          "ci_low": 0.7209431025760388,
-          "ci_high": 0.7543714525989336,
-          "frames": 1384
+          "ci_low": 0.7285640814458885,
+          "ci_high": 0.741702426640279,
+          "frames": 6879
         },
         {
           "label": "Pedestrian",
-          "ap": 0.47894984651201844,
-          "positives": 828,
+          "ap": 0.4801065138909371,
+          "positives": 4114,
           "trustworthy": true,
-          "ci_low": 0.4419341492726866,
-          "ci_high": 0.5198693681024448,
-          "frames": 819
+          "ci_low": 0.4608830003038812,
+          "ci_high": 0.49951902957042277,
+          "frames": 4078
         },
         {
           "label": "Cyclist",
-          "ap": 0.0024959984052548467,
-          "positives": 307,
+          "ap": 0.004466516418428318,
+          "positives": 1493,
           "trustworthy": true,
-          "ci_low": 0.0006726702121298879,
-          "ci_high": 0.00790951690223208,
-          "frames": 426
+          "ci_low": 0.0030071010289644514,
+          "ci_high": 0.00737695423503692,
+          "frames": 2020
         }
       ]
     },
@@ -517,30 +517,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.7457185877766628,
-          "positives": 107,
+          "ap": 0.7369862136408629,
+          "positives": 617,
           "trustworthy": true,
-          "ci_low": 0.661448278543971,
-          "ci_high": 0.822187004772973,
-          "frames": 1253
+          "ci_low": 0.7021190382338256,
+          "ci_high": 0.7724216844933556,
+          "frames": 6230
         },
         {
           "label": "Pedestrian",
-          "ap": 0.522341760623656,
-          "positives": 22,
+          "ap": 0.4939987439898593,
+          "positives": 143,
           "trustworthy": true,
-          "ci_low": 0.3101338850381164,
-          "ci_high": 0.7307230700456655,
-          "frames": 708
+          "ci_low": 0.42451416245822005,
+          "ci_high": 0.5777456786777562,
+          "frames": 3556
         },
         {
           "label": "Cyclist",
-          "ap": 0.0374037403740374,
-          "positives": 6,
-          "trustworthy": false,
-          "ci_low": 0.0,
-          "ci_high": 0.1839753723271488,
-          "frames": 281
+          "ap": 0.011757695858905565,
+          "positives": 24,
+          "trustworthy": true,
+          "ci_low": 0.0020458890938050873,
+          "ci_high": 0.04568078432267596,
+          "frames": 1371
         }
       ]
     },
@@ -550,30 +550,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.7236835696951225,
-          "positives": 87,
+          "ap": 0.7104848092236373,
+          "positives": 483,
           "trustworthy": true,
-          "ci_low": 0.6275402409665984,
-          "ci_high": 0.8117892138132558,
-          "frames": 1250
+          "ci_low": 0.6673940110035378,
+          "ci_high": 0.7540795624351943,
+          "frames": 6223
         },
         {
           "label": "Pedestrian",
-          "ap": 0.18664284031672762,
-          "positives": 11,
+          "ap": 0.2764016134240432,
+          "positives": 81,
           "trustworthy": true,
-          "ci_low": 0.03129375843699145,
-          "ci_high": 0.5067227795076866,
-          "frames": 707
+          "ci_low": 0.19408380290465624,
+          "ci_high": 0.39705922107059616,
+          "frames": 3545
         },
         {
           "label": "Cyclist",
-          "ap": 0.0025279123657046556,
-          "positives": 9,
-          "trustworthy": false,
+          "ap": 0.0019755723703192454,
+          "positives": 24,
+          "trustworthy": true,
           "ci_low": 0.0,
-          "ci_high": 0.023023421445918176,
-          "frames": 282
+          "ci_high": 0.014153244129790502,
+          "frames": 1370
         }
       ]
     },
@@ -583,30 +583,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.725896196813602,
-          "positives": 119,
+          "ap": 0.741635139788707,
+          "positives": 601,
           "trustworthy": true,
-          "ci_low": 0.6419785888470944,
-          "ci_high": 0.8128840105450725,
-          "frames": 1250
+          "ci_low": 0.7055071890867766,
+          "ci_high": 0.7764941377563126,
+          "frames": 6225
         },
         {
           "label": "Pedestrian",
-          "ap": 0.10297029702970298,
-          "positives": 8,
-          "trustworthy": false,
-          "ci_low": 0.0,
-          "ci_high": 0.45992161716171603,
-          "frames": 707
+          "ap": 0.10079249342065429,
+          "positives": 60,
+          "trustworthy": true,
+          "ci_low": 0.05584461564461052,
+          "ci_high": 0.19758110081997807,
+          "frames": 3538
         },
         {
           "label": "Cyclist",
-          "ap": 0.012871287128712872,
-          "positives": 4,
-          "trustworthy": false,
-          "ci_low": 0.0,
-          "ci_high": 0.1149418854928971,
-          "frames": 282
+          "ap": 0.010784500218147596,
+          "positives": 18,
+          "trustworthy": true,
+          "ci_low": 0.001200640772732944,
+          "ci_high": 0.057557113588222096,
+          "frames": 1373
         }
       ]
     },
@@ -616,30 +616,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.7243286952483138,
-          "positives": 443,
+          "ap": 0.7342050849129019,
+          "positives": 2366,
           "trustworthy": true,
-          "ci_low": 0.6850113295582937,
-          "ci_high": 0.7645034519893839,
-          "frames": 1264
+          "ci_low": 0.7162451442297474,
+          "ci_high": 0.7528340869697051,
+          "frames": 6295
         },
         {
           "label": "Pedestrian",
-          "ap": 0.16884593948139803,
-          "positives": 24,
+          "ap": 0.11681291605089553,
+          "positives": 89,
           "trustworthy": true,
-          "ci_low": 0.029590632140137095,
-          "ci_high": 0.3091132029194158,
-          "frames": 708
+          "ci_low": 0.06389148989944086,
+          "ci_high": 0.18545681293659824,
+          "frames": 3548
         },
         {
           "label": "Cyclist",
-          "ap": 0.0017222458961905433,
-          "positives": 15,
+          "ap": 0.0006208620880175977,
+          "positives": 68,
           "trustworthy": true,
-          "ci_low": 0.0,
-          "ci_high": 0.009728752863046402,
-          "frames": 282
+          "ci_low": 3.602659476994036e-05,
+          "ci_high": 0.003416271161722417,
+          "frames": 1379
         }
       ]
     },
@@ -649,30 +649,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.861687194494197,
-          "positives": 713,
+          "ap": 0.8657103968426421,
+          "positives": 3781,
           "trustworthy": true,
-          "ci_low": 0.8392844953617372,
-          "ci_high": 0.8862376537962422,
-          "frames": 1271
+          "ci_low": 0.8571196489529758,
+          "ci_high": 0.8765020994288172,
+          "frames": 6354
         },
         {
           "label": "Pedestrian",
-          "ap": 0.6892142673958962,
-          "positives": 273,
+          "ap": 0.7093963036912866,
+          "positives": 1392,
           "trustworthy": true,
-          "ci_low": 0.6290463463786313,
-          "ci_high": 0.7513270062676777,
-          "frames": 778
+          "ci_low": 0.6810895121723863,
+          "ci_high": 0.7411048994493792,
+          "frames": 3891
         },
         {
           "label": "Cyclist",
-          "ap": 0.021216149319091444,
-          "positives": 51,
+          "ap": 0.01975083757936972,
+          "positives": 218,
           "trustworthy": true,
-          "ci_low": 0.00288571197034524,
-          "ci_high": 0.07200921233882202,
-          "frames": 284
+          "ci_low": 0.008780428750843389,
+          "ci_high": 0.03793286216599885,
+          "frames": 1394
         }
       ]
     },
@@ -682,30 +682,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.8035375346048513,
-          "positives": 1280,
+          "ap": 0.7932624307602497,
+          "positives": 6707,
           "trustworthy": true,
-          "ci_low": 0.7776102450614119,
-          "ci_high": 0.8288208019971641,
-          "frames": 1287
+          "ci_low": 0.7836689379193758,
+          "ci_high": 0.8046352021441282,
+          "frames": 6444
         },
         {
           "label": "Pedestrian",
-          "ap": 0.3611722558439752,
-          "positives": 360,
+          "ap": 0.3523547328709023,
+          "positives": 1674,
           "trustworthy": true,
-          "ci_low": 0.30656183577327123,
-          "ci_high": 0.421040712527069,
-          "frames": 716
+          "ci_low": 0.32312310310769804,
+          "ci_high": 0.3816964074910922,
+          "frames": 3595
         },
         {
           "label": "Cyclist",
-          "ap": 0.0018217102550831036,
-          "positives": 105,
+          "ap": 0.00552188079777954,
+          "positives": 528,
           "trustworthy": true,
-          "ci_low": 0.00023632210150738476,
-          "ci_high": 0.006821960256750516,
-          "frames": 320
+          "ci_low": 0.0027952055618273965,
+          "ci_high": 0.009209327886493668,
+          "frames": 1534
         }
       ]
     },
@@ -715,30 +715,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.6556280586533018,
-          "positives": 1292,
+          "ap": 0.6679952286537388,
+          "positives": 6694,
           "trustworthy": true,
-          "ci_low": 0.62682312188501,
-          "ci_high": 0.6853804924000995,
-          "frames": 1286
+          "ci_low": 0.6566532455078868,
+          "ci_high": 0.6816076625782859,
+          "frames": 6400
         },
         {
           "label": "Pedestrian",
-          "ap": 0.0690475245440299,
-          "positives": 149,
+          "ap": 0.07724186534453972,
+          "positives": 875,
           "trustworthy": true,
-          "ci_low": 0.048965312396425265,
-          "ci_high": 0.10185755762442796,
-          "frames": 731
+          "ci_low": 0.06789846510689042,
+          "ci_high": 0.08954039790538826,
+          "frames": 3625
         },
         {
           "label": "Cyclist",
-          "ap": 0.0001380989162746062,
-          "positives": 79,
+          "ap": 7.319188867722241e-05,
+          "positives": 381,
           "trustworthy": true,
-          "ci_low": 0.0,
-          "ci_high": 0.0008334949666786023,
-          "frames": 327
+          "ci_low": 2.0082239136112356e-05,
+          "ci_high": 0.0002063056475805471,
+          "frames": 1575
         }
       ]
     },
@@ -748,30 +748,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.5178761438960608,
-          "positives": 971,
+          "ap": 0.501040186150377,
+          "positives": 5078,
           "trustworthy": true,
-          "ci_low": 0.4824755018994175,
-          "ci_high": 0.557972948842866,
-          "frames": 1276
+          "ci_low": 0.48533666019159083,
+          "ci_high": 0.5199742028892432,
+          "frames": 6336
         },
         {
           "label": "Pedestrian",
-          "ap": 0.007096083674543321,
-          "positives": 74,
+          "ap": 0.008502007210160475,
+          "positives": 346,
           "trustworthy": true,
-          "ci_low": 0.0033995545661034596,
-          "ci_high": 0.013618052407751982,
-          "frames": 718
+          "ci_low": 0.006228049539644759,
+          "ci_high": 0.011122157820128046,
+          "frames": 3603
         },
         {
           "label": "Cyclist",
-          "ap": 0.0,
-          "positives": 56,
+          "ap": 3.059165796079067e-06,
+          "positives": 263,
           "trustworthy": true,
           "ci_low": 0.0,
-          "ci_high": 0.0,
-          "frames": 317
+          "ci_high": 1.7137792237703305e-05,
+          "frames": 1523
         }
       ]
     },
@@ -781,30 +781,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.34132294356342613,
-          "positives": 686,
+          "ap": 0.32598609538011397,
+          "positives": 3285,
           "trustworthy": true,
-          "ci_low": 0.304205388104982,
-          "ci_high": 0.38861298713211395,
-          "frames": 1278
+          "ci_low": 0.308712455518756,
+          "ci_high": 0.34581833529127104,
+          "frames": 6336
         },
         {
           "label": "Pedestrian",
-          "ap": 0.000999258882995112,
-          "positives": 21,
+          "ap": 0.0005053369383772881,
+          "positives": 98,
           "trustworthy": true,
-          "ci_low": 9.251651578411088e-05,
-          "ci_high": 0.003673029066839692,
-          "frames": 708
+          "ci_low": 0.0002134243035071032,
+          "ci_high": 0.0009620367967368097,
+          "frames": 3548
         },
         {
           "label": "Cyclist",
           "ap": 0.0,
-          "positives": 32,
+          "positives": 133,
           "trustworthy": true,
           "ci_low": 0.0,
           "ci_high": 0.0,
-          "frames": 305
+          "frames": 1465
         }
       ]
     },
@@ -814,30 +814,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.17186807253631078,
-          "positives": 637,
+          "ap": 0.16417470061041842,
+          "positives": 3197,
           "trustworthy": true,
-          "ci_low": 0.1490056584150166,
-          "ci_high": 0.19883722796044945,
-          "frames": 1292
+          "ci_low": 0.15394700365625447,
+          "ci_high": 0.17656170594351356,
+          "frames": 6392
         },
         {
           "label": "Pedestrian",
-          "ap": 0.00048221240628720883,
-          "positives": 16,
+          "ap": 7.684783799390256e-05,
+          "positives": 102,
           "trustworthy": true,
-          "ci_low": 0.0,
-          "ci_high": 0.002036314133372687,
-          "frames": 709
+          "ci_low": 1.8380217061925773e-05,
+          "ci_high": 0.00027021310409927786,
+          "frames": 3551
         },
         {
           "label": "Cyclist",
           "ap": 0.0,
-          "positives": 18,
+          "positives": 104,
           "trustworthy": true,
           "ci_low": 0.0,
           "ci_high": 0.0,
-          "frames": 297
+          "frames": 1444
         }
       ]
     },
@@ -847,30 +847,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.24384551126215484,
-          "positives": 834,
+          "ap": 0.23460040456071526,
+          "positives": 4108,
           "trustworthy": true,
-          "ci_low": 0.21551170175334008,
-          "ci_high": 0.2750358726930992,
-          "frames": 1301
+          "ci_low": 0.22112971475396542,
+          "ci_high": 0.24692656424418152,
+          "frames": 6424
         },
         {
           "label": "Pedestrian",
-          "ap": 6.75067506750675e-05,
-          "positives": 12,
+          "ap": 9.163341137445536e-06,
+          "positives": 82,
           "trustworthy": true,
           "ci_low": 0.0,
-          "ci_high": 0.0007626407175171984,
-          "frames": 709
+          "ci_high": 5.287685720208743e-05,
+          "frames": 3549
         },
         {
           "label": "Cyclist",
           "ap": 0.0,
-          "positives": 17,
+          "positives": 97,
           "trustworthy": true,
           "ci_low": 0.0,
           "ci_high": 0.0,
-          "frames": 297
+          "frames": 1440
         }
       ]
     },
@@ -880,30 +880,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.5463965791945317,
-          "positives": 1481,
+          "ap": 0.53244244614591,
+          "positives": 7552,
           "trustworthy": true,
-          "ci_low": 0.5145158163066897,
-          "ci_high": 0.5771080644705779,
-          "frames": 1294
+          "ci_low": 0.5192131667930352,
+          "ci_high": 0.5466251349185596,
+          "frames": 6419
         },
         {
           "label": "Pedestrian",
-          "ap": 0.004723793009950569,
-          "positives": 73,
+          "ap": 0.003949247302414152,
+          "positives": 339,
           "trustworthy": true,
-          "ci_low": 0.0019379947524036873,
-          "ci_high": 0.009683707474781292,
-          "frames": 716
+          "ci_low": 0.002787883330247122,
+          "ci_high": 0.005651131425658098,
+          "frames": 3597
         },
         {
           "label": "Cyclist",
-          "ap": 0.0,
-          "positives": 81,
+          "ap": 3.059165796079067e-06,
+          "positives": 334,
           "trustworthy": true,
           "ci_low": 0.0,
-          "ci_high": 0.0,
-          "frames": 334
+          "ci_high": 1.5539419266631126e-05,
+          "frames": 1580
         }
       ]
     },
@@ -913,30 +913,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.7202142226407818,
-          "positives": 1859,
+          "ap": 0.713162983992677,
+          "positives": 9547,
           "trustworthy": true,
-          "ci_low": 0.7002992014465814,
-          "ci_high": 0.7444462101533404,
-          "frames": 1302
+          "ci_low": 0.7051683476146713,
+          "ci_high": 0.7248378137602299,
+          "frames": 6481
         },
         {
           "label": "Pedestrian",
-          "ap": 0.14423874403010148,
-          "positives": 294,
+          "ap": 0.15771152470199643,
+          "positives": 1592,
           "trustworthy": true,
-          "ci_low": 0.11076389787757814,
-          "ci_high": 0.18760806049209328,
-          "frames": 735
+          "ci_low": 0.14170335225369662,
+          "ci_high": 0.17725625346518228,
+          "frames": 3665
         },
         {
           "label": "Cyclist",
-          "ap": 0.00012207401942565128,
-          "positives": 136,
+          "ap": 0.00023742884165004998,
+          "positives": 657,
           "trustworthy": true,
-          "ci_low": 7.494926511284679e-06,
-          "ci_high": 0.0006654692790378821,
-          "frames": 358
+          "ci_low": 0.00010105194918911825,
+          "ci_high": 0.0004970046727968772,
+          "frames": 1719
         }
       ]
     },
@@ -946,30 +946,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.8244736736548431,
-          "positives": 891,
+          "ap": 0.820170933911898,
+          "positives": 4823,
           "trustworthy": true,
-          "ci_low": 0.7985602173296894,
-          "ci_high": 0.8486275496530588,
-          "frames": 1278
+          "ci_low": 0.8105226365743431,
+          "ci_high": 0.8314827515072801,
+          "frames": 6418
         },
         {
           "label": "Pedestrian",
-          "ap": 0.4766553314919154,
-          "positives": 338,
+          "ap": 0.5011745378397288,
+          "positives": 1589,
           "trustworthy": true,
-          "ci_low": 0.4205728767568282,
-          "ci_high": 0.5504107706462743,
-          "frames": 747
+          "ci_low": 0.4746378162101704,
+          "ci_high": 0.5329447059809161,
+          "frames": 3713
         },
         {
           "label": "Cyclist",
-          "ap": 0.009826639425904414,
-          "positives": 67,
+          "ap": 0.012139234859861492,
+          "positives": 373,
           "trustworthy": true,
-          "ci_low": 0.002211634884933119,
-          "ci_high": 0.030506579179288843,
-          "frames": 293
+          "ci_low": 0.006569901585433084,
+          "ci_high": 0.020487902962030003,
+          "frames": 1438
         }
       ]
     },
@@ -979,30 +979,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.8730506833393403,
-          "positives": 514,
+          "ap": 0.8806917737806232,
+          "positives": 2712,
           "trustworthy": true,
-          "ci_low": 0.8424872891948232,
-          "ci_high": 0.9037802997663139,
-          "frames": 1265
+          "ci_low": 0.8703254838615109,
+          "ci_high": 0.8932567863261892,
+          "frames": 6307
         },
         {
           "label": "Pedestrian",
-          "ap": 0.6758421550130855,
-          "positives": 176,
+          "ap": 0.6835313598421384,
+          "positives": 885,
           "trustworthy": true,
-          "ci_low": 0.6180771624181338,
-          "ci_high": 0.7483841707664912,
-          "frames": 744
+          "ci_low": 0.6467270645821808,
+          "ci_high": 0.7233189121026001,
+          "frames": 3751
         },
         {
           "label": "Cyclist",
-          "ap": 0.01123078566974082,
-          "positives": 40,
+          "ap": 0.01442345173723575,
+          "positives": 166,
           "trustworthy": true,
-          "ci_low": 0.0006300869741861798,
-          "ci_high": 0.04234758724789657,
-          "frames": 283
+          "ci_low": 0.00523116805021574,
+          "ci_high": 0.030984289579879455,
+          "frames": 1384
         }
       ]
     },
@@ -1012,30 +1012,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.7152638723007191,
-          "positives": 1702,
+          "ap": 0.719902785018589,
+          "positives": 8821,
           "trustworthy": true,
-          "ci_low": 0.692879294571933,
-          "ci_high": 0.7377597067358886,
-          "frames": 1297
+          "ci_low": 0.7109720212284012,
+          "ci_high": 0.7301133639336724,
+          "frames": 6470
         },
         {
           "label": "Pedestrian",
-          "ap": 0.39235402474796194,
-          "positives": 209,
+          "ap": 0.3768999324041037,
+          "positives": 1108,
           "trustworthy": true,
-          "ci_low": 0.3197575526929542,
-          "ci_high": 0.4823010589646822,
-          "frames": 744
+          "ci_low": 0.3433191637374548,
+          "ci_high": 0.4113990695798301,
+          "frames": 3707
         },
         {
           "label": "Cyclist",
-          "ap": 0.00044590219155042805,
-          "positives": 61,
+          "ap": 0.0005338357931489029,
+          "positives": 294,
           "trustworthy": true,
-          "ci_low": 0.0,
-          "ci_high": 0.00341438887832578,
-          "frames": 304
+          "ci_low": 0.00010330456212859969,
+          "ci_high": 0.0019077903715534214,
+          "frames": 1494
         }
       ]
     },
@@ -1045,30 +1045,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.7048845290506663,
-          "positives": 3143,
+          "ap": 0.6955498488983172,
+          "positives": 15895,
           "trustworthy": true,
-          "ci_low": 0.683989424391893,
-          "ci_high": 0.7244895189825535,
-          "frames": 1358
+          "ci_low": 0.6894150592216741,
+          "ci_high": 0.705745200412988,
+          "frames": 6727
         },
         {
           "label": "Pedestrian",
-          "ap": 0.3340460741853358,
-          "positives": 458,
+          "ap": 0.34303934869461966,
+          "positives": 2326,
           "trustworthy": true,
-          "ci_low": 0.28708141634814416,
-          "ci_high": 0.38408439915305265,
-          "frames": 761
+          "ci_low": 0.31729812147156944,
+          "ci_high": 0.3676487757038471,
+          "frames": 3814
         },
         {
           "label": "Cyclist",
-          "ap": 0.0007511988671848124,
-          "positives": 176,
+          "ap": 0.0013491034257569331,
+          "positives": 847,
           "trustworthy": true,
-          "ci_low": 8.038407779906299e-05,
-          "ci_high": 0.003244502363717041,
-          "frames": 381
+          "ci_low": 0.0006257075437196495,
+          "ci_high": 0.002953843788939087,
+          "frames": 1771
         }
       ]
     },
@@ -1078,30 +1078,30 @@
       "cells": [
         {
           "label": "Car",
-          "ap": 0.6802277566331821,
-          "positives": 734,
+          "ap": 0.6771650628777043,
+          "positives": 4026,
           "trustworthy": true,
-          "ci_low": 0.6458986479020724,
-          "ci_high": 0.7153667258021691,
-          "frames": 1264
+          "ci_low": 0.6637138053292949,
+          "ci_high": 0.6924900282948039,
+          "frames": 6313
         },
         {
           "label": "Pedestrian",
-          "ap": 0.3993039537141694,
-          "positives": 226,
+          "ap": 0.4314389922772998,
+          "positives": 1053,
           "trustworthy": true,
-          "ci_low": 0.34523624645492074,
-          "ci_high": 0.46599492042902463,
-          "frames": 734
+          "ci_low": 0.39794985286571183,
+          "ci_high": 0.4665104781726333,
+          "frames": 3675
         },
         {
           "label": "Cyclist",
-          "ap": 0.010579271556912382,
-          "positives": 104,
+          "ap": 0.011421024150502812,
+          "positives": 486,
           "trustworthy": true,
-          "ci_low": 0.0023980826490023685,
-          "ci_high": 0.03283565897808636,
-          "frames": 315
+          "ci_low": 0.005759097656157038,
+          "ci_high": 0.021398531137715327,
+          "frames": 1552
         }
       ]
     }

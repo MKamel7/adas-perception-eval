@@ -36,6 +36,32 @@ class CacheError(ValueError):
     """A cache that cannot be trusted, as opposed to one that is absent."""
 
 
+def processed_frames(path: Path) -> set[str]:
+    """Which frames the cache says were actually run.
+
+    NOT the frames that produced detections. A frame the detector found nothing
+    in leaves no detection rows, so the two sets differ exactly on the hardest
+    frames, and treating "no rows" as "not run" would re-run them forever while
+    treating it as "run" would silently accept a truncated cache. The writer
+    emits a `frame` record per frame for this reason.
+    """
+    if not path.exists():
+        return set()
+    done: set[str] = set()
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            # A half-written final line. Everything before it is still good,
+            # and the frame it belonged to simply gets run again.
+            break
+        if row.get("kind") == "frame":
+            done.add(row["frame_id"])
+    return done
+
+
 def load_detections(path: Path) -> tuple[Header, dict[str, list[Detection]]]:
     """Every cached detection, keyed by frame.
 
@@ -68,6 +94,11 @@ def load_detections(path: Path) -> tuple[Header, dict[str, list[Detection]]]:
             raise CacheError(
                 f"{path}:{number} is not valid JSON. A truncated cache must "
                 f"fail here rather than load as a shorter evaluation.") from bad
+        if row.get("kind") == "frame":
+            # A progress marker, not a detection. Present so a frame with no
+            # detections is distinguishable from one that was never run.
+            by_frame.setdefault(row["frame_id"], [])
+            continue
         by_frame[row["frame_id"]].append(Detection(
             frame_id=row["frame_id"], label=row["label"], score=row["score"],
             box=Box2D(*row["box"])))

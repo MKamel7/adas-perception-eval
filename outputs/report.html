@@ -34,26 +34,26 @@ td.thin::after { content:" ~"; }
         color:var(--dim); margin:1rem 0; }
 .bad { color:var(--bad); } .warn { color:var(--warn); }
 </style></head><body><main><h1>ADAS perception evaluation</h1>
-<p class="sub">yolov8s.onnx on 1500 KITTI frames, 7945 annotated objects, IoU 0.5. Pretrained COCO weights; nothing was trained.</p>
+<p class="sub">yolov8s.onnx on 7481 KITTI frames, 40570 annotated objects, IoU 0.5. Pretrained COCO weights; nothing was trained.</p>
 <div class="headline">
-<div><b>0.625</b><span>mAP over Car, Pedestrian</span></div>
-<div><b>5.5x</b><span>Car spread, worst 0.172 at distance: &gt;50 m</span></div>
-<div><b>10229.8x</b><span>Pedestrian spread, worst 0.000 at box height: 0-25 px</span></div>
+<div><b>0.630</b><span>mAP over Car, Pedestrian</span></div>
+<div><b>5.7x</b><span>Car spread, worst 0.164 at distance: &gt;50 m</span></div>
+<div><b>77416.8x</b><span>Pedestrian spread, worst 0.000 at box height: 0-25 px</span></div>
 </div>
 <div class="note">The aggregate above is the least informative number on this page. Everything below is the same detections cut along attributes the benchmark annotated before anyone saw a result.</div>
 <h2>Overall, and by the benchmark's own difficulty</h2>
 <div class="scroll"><table><thead><tr><th>subset</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
-<tr><td>all</td><td><span class="bar" style="width:45px"></span>0.754<span class="ci">0.743-0.769</span></td><td><span class="bar" style="width:30px"></span>0.495<span class="ci">0.457-0.536</span></td><td><span class="bar" style="width:1px"></span>0.006<span class="ci">0.002-0.015</span></td><td>6813</td></tr>
-<tr><td>easy</td><td><span class="bar" style="width:56px"></span>0.938</td><td><span class="bar" style="width:41px"></span>0.691</td><td><span class="bar" style="width:1px"></span>0.004</td><td>1772</td></tr>
-<tr><td>moderate</td><td><span class="bar" style="width:53px"></span>0.882</td><td><span class="bar" style="width:36px"></span>0.594</td><td><span class="bar" style="width:1px"></span>0.004</td><td>4018</td></tr>
-<tr><td>hard</td><td><span class="bar" style="width:46px"></span>0.772</td><td><span class="bar" style="width:30px"></span>0.501</td><td><span class="bar" style="width:1px"></span>0.006</td><td>5296</td></tr>
+<tr><td>all</td><td><span class="bar" style="width:45px"></span>0.754<span class="ci">0.750-0.762</span></td><td><span class="bar" style="width:30px"></span>0.506<span class="ci">0.488-0.523</span></td><td><span class="bar" style="width:1px"></span>0.008<span class="ci">0.005-0.013</span></td><td>34856</td></tr>
+<tr><td>easy</td><td><span class="bar" style="width:56px"></span>0.937</td><td><span class="bar" style="width:41px"></span>0.686</td><td><span class="bar" style="width:1px"></span>0.006</td><td>8935</td></tr>
+<tr><td>moderate</td><td><span class="bar" style="width:53px"></span>0.880</td><td><span class="bar" style="width:36px"></span>0.593</td><td><span class="bar" style="width:1px"></span>0.006</td><td>20377</td></tr>
+<tr><td>hard</td><td><span class="bar" style="width:46px"></span>0.765</td><td><span class="bar" style="width:31px"></span>0.517</td><td><span class="bar" style="width:1px"></span>0.007</td><td>27186</td></tr>
 </tbody></table></div>
 <h2>Was it missed, or just boxed badly?</h2>
 <p class="q">Two failures with different fixes, reported as one number everywhere else on this page.</p>
 <div class="scroll"><table><thead><tr><th>class</th><th>AP@0.3</th><th>AP@0.5</th><th>AP@0.7</th><th>found</th><th>mislocated</th><th>unseen</th><th>of misses, a box problem</th></tr></thead><tbody>
-<tr><td>Car</td><td>0.852</td><td>0.754</td><td>0.532</td><td>4566</td><td>735</td><td>278</td><td>73%</td></tr>
-<tr><td>Pedestrian</td><td>0.583</td><td>0.495</td><td>0.272</td><td>599</td><td>138</td><td>156</td><td>47%</td></tr>
-<tr><td>Cyclist</td><td>0.093</td><td>0.006</td><td>0.000</td><td>21</td><td>65</td><td>255</td><td>20%</td></tr>
+<tr><td>Car</td><td>0.849</td><td>0.754</td><td>0.525</td><td>23511</td><td>3839</td><td>1392</td><td>73%</td></tr>
+<tr><td>Pedestrian</td><td>0.596</td><td>0.506</td><td>0.266</td><td>3084</td><td>682</td><td>721</td><td>49%</td></tr>
+<tr><td>Cyclist</td><td>0.075</td><td>0.008</td><td>0.000</td><td>125</td><td>286</td><td>1216</td><td>19%</td></tr>
 </tbody></table></div>
 <div class="note">A box emitted on the object that did not overlap enough to score is a different failure from nothing being emitted at all. The first is answered with box regression and the detector already knows the object is there; the second is answered with recall, or a different sensor. For a safety argument they are not equally alarming: a system that knows something is roughly there can still brake for it. <b>AP@0.7 is KITTI's own threshold for Car</b>, so that column is the one comparable with the KITTI benchmark.</div>
 <h2>Choosing an operating point</h2>
@@ -61,16 +61,16 @@ td.thin::after { content:" ~"; }
 <h3>Car</h3>
 <div class="note">The most that can be found at ANY threshold is <b>81.8%</b> recall. A target above that is not a threshold problem and no operating point fixes it.</div>
 <div class="scroll"><table><thead><tr><th>target recall</th><th>threshold</th><th>precision</th><th>false alarms per frame</th><th>pedestrians missed</th></tr></thead><tbody>
-<tr><td>50%</td><td>0.670</td><td>0.956</td><td>0.09</td><td>2719</td></tr>
-<tr><td>70%</td><td>0.436</td><td>0.850</td><td>0.46</td><td>1665</td></tr>
-<tr><td>80%</td><td>0.136</td><td>0.571</td><td>2.24</td><td>1112</td></tr>
+<tr><td>50%</td><td>0.681</td><td>0.955</td><td>0.09</td><td>14228</td></tr>
+<tr><td>70%</td><td>0.413</td><td>0.834</td><td>0.54</td><td>8269</td></tr>
+<tr><td>80%</td><td>0.129</td><td>0.563</td><td>2.39</td><td>5713</td></tr>
 <tr><td>90%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
 <tr><td>95%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
 </tbody></table></div>
 <h3>Pedestrian</h3>
-<div class="note">The most that can be found at ANY threshold is <b>67.1%</b> recall. A target above that is not a threshold problem and no operating point fixes it.</div>
+<div class="note">The most that can be found at ANY threshold is <b>68.7%</b> recall. A target above that is not a threshold problem and no operating point fixes it.</div>
 <div class="scroll"><table><thead><tr><th>target recall</th><th>threshold</th><th>precision</th><th>false alarms per frame</th><th>pedestrians missed</th></tr></thead><tbody>
-<tr><td>50%</td><td>0.502</td><td>0.621</td><td>0.19</td><td>435</td></tr>
+<tr><td>50%</td><td>0.522</td><td>0.660</td><td>0.15</td><td>2243</td></tr>
 <tr><td>70%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
 <tr><td>80%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
 <tr><td>90%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
@@ -80,54 +80,54 @@ td.thin::after { content:" ~"; }
 <h2>By difficulty</h2>
 <p class="q">Does the benchmark&#x27;s own notion of difficulty predict failure?</p>
 <div class="scroll"><table><thead><tr><th>difficulty</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
-<tr><td>easy</td><td><span class="bar" style="width:56px"></span>0.938<span class="ci">0.926-0.952</span></td><td><span class="bar" style="width:41px"></span>0.691<span class="ci">0.649-0.738</span></td><td><span class="bar" style="width:1px"></span>0.004<span class="ci">0.000-0.013</span></td><td>1772</td></tr>
-<tr><td>moderate</td><td><span class="bar" style="width:47px"></span>0.784<span class="ci">0.764-0.804</span></td><td><span class="bar" style="width:11px"></span>0.178<span class="ci">0.132-0.233</span></td><td><span class="bar" style="width:1px"></span>0.002<span class="ci">0.000-0.013</span></td><td>2246</td></tr>
-<tr><td>hard</td><td><span class="bar" style="width:20px"></span>0.338<span class="ci">0.307-0.376</span></td><td><span class="bar" style="width:2px"></span>0.035<span class="ci">0.016-0.075</span></td><td><span class="bar" style="width:1px"></span>0.007<span class="ci">0.000-0.051</span></td><td>1278</td></tr>
-<tr><td>ignored</td><td><span class="bar" style="width:32px"></span>0.540<span class="ci">0.512-0.568</span></td><td><span class="bar" style="width:9px"></span>0.148<span class="ci">0.051-0.272</span></td><td><span class="bar" style="width:1px"></span>0.002<span class="ci">0.000-0.007</span></td><td>1517</td></tr>
+<tr><td>easy</td><td><span class="bar" style="width:56px"></span>0.937<span class="ci">0.930-0.943</span></td><td><span class="bar" style="width:41px"></span>0.686<span class="ci">0.662-0.711</span></td><td><span class="bar" style="width:1px"></span>0.006<span class="ci">0.003-0.011</span></td><td>8935</td></tr>
+<tr><td>moderate</td><td><span class="bar" style="width:47px"></span>0.779<span class="ci">0.770-0.788</span></td><td><span class="bar" style="width:12px"></span>0.200<span class="ci">0.174-0.226</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.001-0.004</span></td><td>11442</td></tr>
+<tr><td>hard</td><td><span class="bar" style="width:21px"></span>0.352<span class="ci">0.338-0.367</span></td><td><span class="bar" style="width:3px"></span>0.046<span class="ci">0.034-0.065</span></td><td><span class="bar" style="width:1px"></span>0.003<span class="ci">0.000-0.013</span></td><td>6809</td></tr>
+<tr><td>ignored</td><td><span class="bar" style="width:33px"></span>0.552<span class="ci">0.541-0.565</span></td><td><span class="bar" style="width:5px"></span>0.086<span class="ci">0.057-0.135</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.000-0.003</span></td><td>7670</td></tr>
 </tbody></table></div>
 <h2>By occlusion</h2>
 <p class="q">How much of the object may be hidden before it is missed?</p>
 <div class="scroll"><table><thead><tr><th>occlusion</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
-<tr><td>fully visible</td><td><span class="bar" style="width:53px"></span>0.887<span class="ci">0.877-0.898</span></td><td><span class="bar" style="width:39px"></span>0.642<span class="ci">0.593-0.689</span></td><td><span class="bar" style="width:1px"></span>0.003<span class="ci">0.001-0.010</span></td><td>3405</td></tr>
-<tr><td>partly occluded</td><td><span class="bar" style="width:39px"></span>0.655<span class="ci">0.626-0.680</span></td><td><span class="bar" style="width:11px"></span>0.188<span class="ci">0.138-0.249</span></td><td><span class="bar" style="width:1px"></span>0.005<span class="ci">0.000-0.027</span></td><td>1854</td></tr>
-<tr><td>largely occluded</td><td><span class="bar" style="width:15px"></span>0.250<span class="ci">0.226-0.286</span></td><td><span class="bar" style="width:1px"></span>0.023<span class="ci">0.010-0.051</span></td><td class="thin"><span class="bar" style="width:1px"></span>0.002<span class="ci">0.000-0.013</span></td><td>1295</td></tr>
-<tr><td>unknown</td><td><span class="bar" style="width:35px"></span>0.586<span class="ci">0.507-0.656</span></td><td class="thin"><span class="bar" style="width:18px"></span>0.295<span class="ci">0.003-0.654</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.000-0.007</span></td><td>259</td></tr>
+<tr><td>fully visible</td><td><span class="bar" style="width:53px"></span>0.887<span class="ci">0.882-0.891</span></td><td><span class="bar" style="width:39px"></span>0.650<span class="ci">0.630-0.672</span></td><td><span class="bar" style="width:1px"></span>0.005<span class="ci">0.003-0.008</span></td><td>17134</td></tr>
+<tr><td>partly occluded</td><td><span class="bar" style="width:40px"></span>0.666<span class="ci">0.654-0.679</span></td><td><span class="bar" style="width:11px"></span>0.178<span class="ci">0.153-0.206</span></td><td><span class="bar" style="width:1px"></span>0.004<span class="ci">0.001-0.010</span></td><td>9534</td></tr>
+<tr><td>largely occluded</td><td><span class="bar" style="width:16px"></span>0.267<span class="ci">0.255-0.282</span></td><td><span class="bar" style="width:2px"></span>0.026<span class="ci">0.018-0.035</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.001</span></td><td>6924</td></tr>
+<tr><td>unknown</td><td><span class="bar" style="width:33px"></span>0.555<span class="ci">0.520-0.590</span></td><td><span class="bar" style="width:4px"></span>0.073<span class="ci">0.031-0.145</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.000-0.004</span></td><td>1264</td></tr>
 </tbody></table></div>
 <h2>By truncation</h2>
 <p class="q">Does an object leaving the frame stop being detected?</p>
 <div class="scroll"><table><thead><tr><th>truncation</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
-<tr><td>none</td><td><span class="bar" style="width:44px"></span>0.736<span class="ci">0.721-0.754</span></td><td><span class="bar" style="width:29px"></span>0.479<span class="ci">0.442-0.520</span></td><td><span class="bar" style="width:1px"></span>0.002<span class="ci">0.001-0.008</span></td><td>5958</td></tr>
-<tr><td>0-15%</td><td><span class="bar" style="width:45px"></span>0.746<span class="ci">0.661-0.822</span></td><td><span class="bar" style="width:31px"></span>0.522<span class="ci">0.310-0.731</span></td><td class="thin"><span class="bar" style="width:2px"></span>0.037<span class="ci">0.000-0.184</span></td><td>135</td></tr>
-<tr><td>15-30%</td><td><span class="bar" style="width:43px"></span>0.724<span class="ci">0.628-0.812</span></td><td><span class="bar" style="width:11px"></span>0.187<span class="ci">0.031-0.507</span></td><td class="thin"><span class="bar" style="width:1px"></span>0.003<span class="ci">0.000-0.023</span></td><td>107</td></tr>
-<tr><td>30-50%</td><td><span class="bar" style="width:44px"></span>0.726<span class="ci">0.642-0.813</span></td><td class="thin"><span class="bar" style="width:6px"></span>0.103<span class="ci">0.000-0.460</span></td><td class="thin"><span class="bar" style="width:1px"></span>0.013<span class="ci">0.000-0.115</span></td><td>131</td></tr>
-<tr><td>&gt;50%</td><td><span class="bar" style="width:43px"></span>0.724<span class="ci">0.685-0.765</span></td><td><span class="bar" style="width:10px"></span>0.169<span class="ci">0.030-0.309</span></td><td><span class="bar" style="width:1px"></span>0.002<span class="ci">0.000-0.010</span></td><td>482</td></tr>
+<tr><td>none</td><td><span class="bar" style="width:44px"></span>0.734<span class="ci">0.729-0.742</span></td><td><span class="bar" style="width:29px"></span>0.480<span class="ci">0.461-0.500</span></td><td><span class="bar" style="width:1px"></span>0.004<span class="ci">0.003-0.007</span></td><td>30282</td></tr>
+<tr><td>0-15%</td><td><span class="bar" style="width:44px"></span>0.737<span class="ci">0.702-0.772</span></td><td><span class="bar" style="width:30px"></span>0.494<span class="ci">0.425-0.578</span></td><td><span class="bar" style="width:1px"></span>0.012<span class="ci">0.002-0.046</span></td><td>784</td></tr>
+<tr><td>15-30%</td><td><span class="bar" style="width:43px"></span>0.710<span class="ci">0.667-0.754</span></td><td><span class="bar" style="width:17px"></span>0.276<span class="ci">0.194-0.397</span></td><td><span class="bar" style="width:1px"></span>0.002<span class="ci">0.000-0.014</span></td><td>588</td></tr>
+<tr><td>30-50%</td><td><span class="bar" style="width:44px"></span>0.742<span class="ci">0.706-0.776</span></td><td><span class="bar" style="width:6px"></span>0.101<span class="ci">0.056-0.198</span></td><td><span class="bar" style="width:1px"></span>0.011<span class="ci">0.001-0.058</span></td><td>679</td></tr>
+<tr><td>&gt;50%</td><td><span class="bar" style="width:44px"></span>0.734<span class="ci">0.716-0.753</span></td><td><span class="bar" style="width:7px"></span>0.117<span class="ci">0.064-0.185</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.000-0.003</span></td><td>2523</td></tr>
 </tbody></table></div>
 <h2>By distance</h2>
 <p class="q">At what range does the detector stop seeing things?</p>
 <div class="scroll"><table><thead><tr><th>distance</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
-<tr><td>0-10 m</td><td><span class="bar" style="width:52px"></span>0.862<span class="ci">0.839-0.886</span></td><td><span class="bar" style="width:41px"></span>0.689<span class="ci">0.629-0.751</span></td><td><span class="bar" style="width:1px"></span>0.021<span class="ci">0.003-0.072</span></td><td>1037</td></tr>
-<tr><td>10-20 m</td><td><span class="bar" style="width:48px"></span>0.804<span class="ci">0.778-0.829</span></td><td><span class="bar" style="width:22px"></span>0.361<span class="ci">0.307-0.421</span></td><td><span class="bar" style="width:1px"></span>0.002<span class="ci">0.000-0.007</span></td><td>1745</td></tr>
-<tr><td>20-30 m</td><td><span class="bar" style="width:39px"></span>0.656<span class="ci">0.627-0.685</span></td><td><span class="bar" style="width:4px"></span>0.069<span class="ci">0.049-0.102</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.001</span></td><td>1520</td></tr>
-<tr><td>30-40 m</td><td><span class="bar" style="width:31px"></span>0.518<span class="ci">0.482-0.558</span></td><td><span class="bar" style="width:1px"></span>0.007<span class="ci">0.003-0.014</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>1101</td></tr>
-<tr><td>40-50 m</td><td><span class="bar" style="width:20px"></span>0.341<span class="ci">0.304-0.389</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.000-0.004</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>739</td></tr>
-<tr><td>&gt;50 m</td><td><span class="bar" style="width:10px"></span>0.172<span class="ci">0.149-0.199</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.002</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>671</td></tr>
+<tr><td>0-10 m</td><td><span class="bar" style="width:52px"></span>0.866<span class="ci">0.857-0.877</span></td><td><span class="bar" style="width:43px"></span>0.709<span class="ci">0.681-0.741</span></td><td><span class="bar" style="width:1px"></span>0.020<span class="ci">0.009-0.038</span></td><td>5391</td></tr>
+<tr><td>10-20 m</td><td><span class="bar" style="width:48px"></span>0.793<span class="ci">0.784-0.805</span></td><td><span class="bar" style="width:21px"></span>0.352<span class="ci">0.323-0.382</span></td><td><span class="bar" style="width:1px"></span>0.006<span class="ci">0.003-0.009</span></td><td>8909</td></tr>
+<tr><td>20-30 m</td><td><span class="bar" style="width:40px"></span>0.668<span class="ci">0.657-0.682</span></td><td><span class="bar" style="width:5px"></span>0.077<span class="ci">0.068-0.090</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>7950</td></tr>
+<tr><td>30-40 m</td><td><span class="bar" style="width:30px"></span>0.501<span class="ci">0.485-0.520</span></td><td><span class="bar" style="width:1px"></span>0.009<span class="ci">0.006-0.011</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>5687</td></tr>
+<tr><td>40-50 m</td><td><span class="bar" style="width:20px"></span>0.326<span class="ci">0.309-0.346</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.000-0.001</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>3516</td></tr>
+<tr><td>&gt;50 m</td><td><span class="bar" style="width:10px"></span>0.164<span class="ci">0.154-0.177</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>3403</td></tr>
 </tbody></table></div>
 <h2>By box height</h2>
 <p class="q">Is it distance that matters, or simply apparent size?</p>
 <div class="scroll"><table><thead><tr><th>box height</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
-<tr><td>0-25 px</td><td><span class="bar" style="width:15px"></span>0.244<span class="ci">0.216-0.275</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.001</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>863</td></tr>
-<tr><td>25-40 px</td><td><span class="bar" style="width:33px"></span>0.546<span class="ci">0.515-0.577</span></td><td><span class="bar" style="width:1px"></span>0.005<span class="ci">0.002-0.010</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>1635</td></tr>
-<tr><td>40-80 px</td><td><span class="bar" style="width:43px"></span>0.720<span class="ci">0.700-0.744</span></td><td><span class="bar" style="width:9px"></span>0.144<span class="ci">0.111-0.188</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.001</span></td><td>2289</td></tr>
-<tr><td>80-160 px</td><td><span class="bar" style="width:49px"></span>0.824<span class="ci">0.799-0.849</span></td><td><span class="bar" style="width:29px"></span>0.477<span class="ci">0.421-0.550</span></td><td><span class="bar" style="width:1px"></span>0.010<span class="ci">0.002-0.031</span></td><td>1296</td></tr>
-<tr><td>&gt;160 px</td><td><span class="bar" style="width:52px"></span>0.873<span class="ci">0.842-0.904</span></td><td><span class="bar" style="width:41px"></span>0.676<span class="ci">0.618-0.748</span></td><td><span class="bar" style="width:1px"></span>0.011<span class="ci">0.001-0.042</span></td><td>730</td></tr>
+<tr><td>0-25 px</td><td><span class="bar" style="width:14px"></span>0.235<span class="ci">0.221-0.247</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>4287</td></tr>
+<tr><td>25-40 px</td><td><span class="bar" style="width:32px"></span>0.532<span class="ci">0.519-0.547</span></td><td><span class="bar" style="width:1px"></span>0.004<span class="ci">0.003-0.006</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>8225</td></tr>
+<tr><td>40-80 px</td><td><span class="bar" style="width:43px"></span>0.713<span class="ci">0.705-0.725</span></td><td><span class="bar" style="width:9px"></span>0.158<span class="ci">0.142-0.177</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.000</span></td><td>11796</td></tr>
+<tr><td>80-160 px</td><td><span class="bar" style="width:49px"></span>0.820<span class="ci">0.811-0.831</span></td><td><span class="bar" style="width:30px"></span>0.501<span class="ci">0.475-0.533</span></td><td><span class="bar" style="width:1px"></span>0.012<span class="ci">0.007-0.020</span></td><td>6785</td></tr>
+<tr><td>&gt;160 px</td><td><span class="bar" style="width:53px"></span>0.881<span class="ci">0.870-0.893</span></td><td><span class="bar" style="width:41px"></span>0.684<span class="ci">0.647-0.723</span></td><td><span class="bar" style="width:1px"></span>0.014<span class="ci">0.005-0.031</span></td><td>3763</td></tr>
 </tbody></table></div>
 <h2>By position</h2>
 <p class="q">Are objects at the edge of the field of view treated worse?</p>
 <div class="scroll"><table><thead><tr><th>position</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
-<tr><td>left third</td><td><span class="bar" style="width:43px"></span>0.715<span class="ci">0.693-0.738</span></td><td><span class="bar" style="width:24px"></span>0.392<span class="ci">0.320-0.482</span></td><td><span class="bar" style="width:1px"></span>0.000<span class="ci">0.000-0.003</span></td><td>1972</td></tr>
-<tr><td>centre third</td><td><span class="bar" style="width:42px"></span>0.705<span class="ci">0.684-0.724</span></td><td><span class="bar" style="width:20px"></span>0.334<span class="ci">0.287-0.384</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.000-0.003</span></td><td>3777</td></tr>
-<tr><td>right third</td><td><span class="bar" style="width:41px"></span>0.680<span class="ci">0.646-0.715</span></td><td><span class="bar" style="width:24px"></span>0.399<span class="ci">0.345-0.466</span></td><td><span class="bar" style="width:1px"></span>0.011<span class="ci">0.002-0.033</span></td><td>1064</td></tr>
+<tr><td>left third</td><td><span class="bar" style="width:43px"></span>0.720<span class="ci">0.711-0.730</span></td><td><span class="bar" style="width:23px"></span>0.377<span class="ci">0.343-0.411</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.000-0.002</span></td><td>10223</td></tr>
+<tr><td>centre third</td><td><span class="bar" style="width:42px"></span>0.696<span class="ci">0.689-0.706</span></td><td><span class="bar" style="width:21px"></span>0.343<span class="ci">0.317-0.368</span></td><td><span class="bar" style="width:1px"></span>0.001<span class="ci">0.001-0.003</span></td><td>19068</td></tr>
+<tr><td>right third</td><td><span class="bar" style="width:41px"></span>0.677<span class="ci">0.664-0.692</span></td><td><span class="bar" style="width:26px"></span>0.431<span class="ci">0.398-0.467</span></td><td><span class="bar" style="width:1px"></span>0.011<span class="ci">0.006-0.021</span></td><td>5565</td></tr>
 </tbody></table></div>
 <div class="note">The small figures under each number are a 95% confidence interval from resampling FRAMES, not objects: people standing in one group are not independent observations, and resampling objects would understate the range. Two cells whose intervals do not overlap differ by more than the sample explains. Two whose intervals DO overlap are not thereby shown to be the same, which is a weaker statement than it looks. A tilde still marks a cell computed from fewer than ten objects.</div>
 <h2>What this does not claim</h2><div class="note">Cyclist is reported but excluded from the headline: KITTI annotates a rider and bicycle as one box and a COCO detector emits two, so that number measures box convention as much as detection. The IoU threshold is 0.5 for every class, where KITTI's own benchmark uses 0.7 for Car. Average precision follows COCO 101-point interpolation, not KITTI 40-point, so these figures are not directly comparable to the KITTI leaderboard. SOTIF vocabulary is borrowed; its process is not performed and no compliance is claimed.</div>
-<p class="meta">Generated 2026-08-02 10:56 UTC from 1500 frames, 000000 to 001499, detections kept above score 0.05. The mAP implementation is checked against pycocotools to within 0.001 by the test suite.</p></main></body></html>
+<p class="meta">Generated 2026-08-02 13:15 UTC from 7481 frames, 000000 to 007480, detections kept above score 0.05. The mAP implementation is checked against pycocotools to within 0.001 by the test suite.</p></main></body></html>

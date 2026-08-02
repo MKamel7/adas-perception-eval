@@ -28,7 +28,7 @@ from ape.report import render  # noqa: E402
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--detections", type=Path,
-                        default=ROOT / "outputs/detections.jsonl")
+                        default=ROOT / "outputs/detections-yolov8s.jsonl")
     parser.add_argument("--labels", type=Path, default=ROOT / "data/training/label_2")
     parser.add_argument("--out", type=Path, default=ROOT / "outputs/report.html")
     parser.add_argument("--json", type=Path, default=ROOT / "outputs/results.json")

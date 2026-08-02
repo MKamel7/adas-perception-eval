@@ -20,7 +20,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from ape.cache import CacheError, load_detections
+from ape.cache import CacheError, load_detections, processed_frames
 from ape.detect import Letterbox, _nms
 from ape.evaluate import evaluate
 from ape.kitti import load_labels
@@ -101,6 +101,68 @@ def test_blank_lines_in_a_cache_are_skipped(tmp_path: Path) -> None:
     _, detections = load_detections(path)
 
     assert len(detections["a"]) == 1
+
+
+# --- resume, and the distinction it rests on ---------------------------------
+def written(path: Path, *rows: dict) -> Path:
+    header = {"kind": "header", "model": "m.onnx", "frames": 3,
+              "score_threshold": 0.05, "first_frame": "a", "last_frame": "c"}
+    body = "\n".join(json.dumps(row) for row in (header, *rows))
+    path.write_text(body + "\n", encoding="utf-8")
+    return path
+
+
+def test_a_frame_that_produced_nothing_still_counts_as_processed(
+        tmp_path: Path) -> None:
+    """The distinction the whole resume rests on.
+
+    A frame the detector found nothing in leaves no detection rows. Treating
+    that as "not run" would re-run it forever; treating a missing frame as
+    "run" would silently accept a truncated cache. The marker separates them,
+    and the two sets differ exactly on the hardest frames.
+    """
+    path = written(tmp_path / "d.jsonl",
+                   {"frame_id": "a", "label": "Car", "score": 0.9,
+                    "box": [0, 0, 1, 1]},
+                   {"kind": "frame", "frame_id": "a"},
+                   {"kind": "frame", "frame_id": "b"})
+
+    assert processed_frames(path) == {"a", "b"}
+
+    _, detections = load_detections(path)
+    assert detections["a"], "a produced a detection"
+    assert detections["b"] == [], "b was run and produced nothing"
+    assert "c" not in detections, "c was never run"
+
+
+def test_progress_markers_are_not_loaded_as_detections(tmp_path: Path) -> None:
+    """A marker counted as a detection would be a phantom object with no box,
+    inflating the false positive count on exactly the frames that had none."""
+    path = written(tmp_path / "d.jsonl", {"kind": "frame", "frame_id": "a"})
+
+    _, detections = load_detections(path)
+
+    assert detections == {"a": []}
+
+
+def test_a_cache_that_was_never_started_reports_nothing_processed(
+        tmp_path: Path) -> None:
+    assert processed_frames(tmp_path / "absent.jsonl") == set()
+
+
+def test_a_half_written_final_line_does_not_lose_the_frames_before_it(
+        tmp_path: Path) -> None:
+    """An interrupted run ends mid-line. Everything before that line is still
+    good, and the frame it belonged to simply gets run again."""
+    path = tmp_path / "d.jsonl"
+    path.write_text(
+        json.dumps({"kind": "header", "model": "m", "frames": 2,
+                    "score_threshold": 0.05, "first_frame": "a",
+                    "last_frame": "b"}) + "\n"
+        + json.dumps({"kind": "frame", "frame_id": "a"}) + "\n"
+        + '{"kind": "frame", "frame_i', encoding="utf-8")
+
+    assert processed_frames(path) == {"a"}
 
 
 # --- the letterbox, where coordinates silently go wrong ----------------------

@@ -112,7 +112,7 @@ def match(truth, detections, label):
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--detections", type=Path,
-                        default=ROOT / "outputs/detections.jsonl")
+                        default=ROOT / "outputs/detections-yolov8s.jsonl")
     parser.add_argument("--data", type=Path, default=ROOT / "data/training")
     parser.add_argument("--results", type=Path, default=ROOT / "outputs/results.json")
     parser.add_argument("--out", type=Path, default=ROOT / "outputs/p3-demo.mp4")

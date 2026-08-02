@@ -22,15 +22,15 @@ missed rather than adjusted.
 
 ## The result
 
-1500 KITTI frames, 7945 annotated objects, YOLOv8s exported to ONNX, IoU 0.5.
+**The full KITTI training split: 7481 frames, 40,570 annotated objects.** YOLOv8s exported to ONNX, IoU 0.5.
 
 | class | AP | objects | note |
 |---|---|---|---|
-| Car | **0.754** | 5579 | |
-| Pedestrian | **0.495** | 893 | |
-| Cyclist | 0.006 | 341 | mapping-limited, excluded from the headline |
+| Car | **0.754** [0.750, 0.762] | 28742 | |
+| Pedestrian | **0.506** [0.488, 0.523] | 4487 | |
+| Cyclist | 0.008 [0.005, 0.013] | 1627 | mapping-limited, excluded from the headline |
 
-**Headline mAP over Car and Pedestrian: 0.625.**
+**Headline mAP over Car and Pedestrian: 0.630.**
 
 That number is the least useful thing on this page, which is the entire point.
 Cut the same detections along attributes KITTI annotated before anyone saw a
@@ -38,21 +38,21 @@ result:
 
 | | Car | Pedestrian |
 |---|---|---|
-| easy | 0.938 | 0.691 |
-| moderate | 0.882 | 0.594 |
-| hard | 0.772 | 0.501 |
-| 0-10 m | 0.900 | 0.689 |
-| 10-20 m | 0.804 | 0.361 |
-| 20-30 m | 0.656 | 0.069 |
-| 30-40 m | 0.518 | **0.007** |
-| 40-50 m | 0.341 | **0.001** |
-| >50 m | 0.172 | **0.000** |
-| largely occluded | 0.250 | 0.023 |
+| easy | 0.937 | 0.686 |
+| moderate | 0.880 | 0.593 |
+| hard | 0.765 | 0.517 |
+| 0-10 m | 0.902 | 0.709 |
+| 10-20 m | 0.802 | 0.372 |
+| 20-30 m | 0.652 | 0.076 |
+| 30-40 m | 0.514 | **0.010** |
+| 40-50 m | 0.336 | **0.002** |
+| >50 m | 0.164 | **0.000** |
+| largely occluded | 0.249 | 0.025 |
 
 Every figure carries a **95% confidence interval from bootstrapping frames**,
 not objects: people standing in one group are not independent observations, and
-resampling objects would understate the range. Car overall is 0.754 [0.743,
-0.769]; Pedestrian is 0.495 [0.457, 0.536]. The headline claim is tested against
+resampling objects would understate the range. Car overall is 0.754 [0.750,
+0.762]; Pedestrian is 0.506 [0.488, 0.523]. The headline claim is tested against
 its own uncertainty rather than asserted: the 0-10 m and 30-40 m pedestrian
 intervals do not overlap, so the difference is more than the sample explains.
 Overlapping intervals are *not* evidence of no difference, and the report says
@@ -63,12 +63,12 @@ object. That is the quantity time-to-collision depends on, and the choice
 matters: 9.7% of pedestrians would fall in a different band under the other
 definition, so it is stated rather than left implicit.
 
-**A pedestrian detector reported at 0.495 is effectively blind beyond 30 metres.**
-Not degraded, blind: AP 0.007 over 74 objects, and zero beyond 50 m. At 50 km/h a
+**A pedestrian detector reported at 0.506 is effectively blind beyond 30 metres.**
+Not degraded, blind: AP 0.010 over 371 objects, and 0.000 beyond 50 m. At 50 km/h a
 car covers 30 m in about two seconds. That is the finding, and no aggregate
 number contains it.
 
-Car spreads 5.5x between its best slice and its worst. The spec predicted 2x to
+Car spreads 5.7x between its best slice and its worst. The spec predicted 2x to
 3x before running, so the prediction understated the effect; that is recorded
 here rather than quietly updated.
 
@@ -147,6 +147,35 @@ the measurement path may import it, or the validation would be circular.
 | M7 | Report | **done.** One command produces `outputs/report.html` |
 | M8 | Demo and README | **done.** Example frames rendered by rule, README and CV bullet below |
 
+### Which model, and what does the smaller one cost?
+
+Both models were run over all 7481 frames, same order, same preprocessing,
+scored by the same code. Latency measured separately on a warm session, since a
+first call includes graph optimisation no steady-state deployment pays.
+
+| model | size | median | p95 | 1500 frames | budget |
+|---|---|---|---|---|---|
+| YOLOv8n | 12.8 MB | 378 ms | 424 ms | 567 s | **missed** |
+| YOLOv8s | 44.8 MB | 581 ms | 647 ms | 872 s | **missed** |
+
+| model | Car | Pedestrian | headline | Pedestrian recall ceiling |
+|---|---|---|---|---|
+| YOLOv8n | 0.720 | 0.458 | 0.589 | 64.9% |
+| YOLOv8s | 0.754 | 0.506 | 0.630 | 68.7% |
+
+**This README used to say "YOLOv8n would fit the budget at a cost in accuracy".
+That was a guess, and it is wrong.** The nano model is 1.54x faster, not the 3x
+assumed, and 567 s is still nearly double the 300 s budget. **No model here
+reaches it.** The budget was written for hardware this is not, and swapping the
+model does not rescue it.
+
+What the smaller model actually costs is modest: 4.5% of Car AP, 9.5% of
+Pedestrian AP, and 3.8 points of pedestrian recall ceiling. If the constraint
+were throughput rather than a fixed budget, that is a defensible trade. It is
+recorded here because "a smaller model would fix it" is the kind of sentence
+that sounds like analysis and contains no information until somebody measures
+it.
+
 ### M2 missed its budget, and the reason is not the code
 
 1500 frames took 799 seconds against a 300 second budget. I assumed the
@@ -161,10 +190,11 @@ should have come first, put the time where it actually was:
 | image load | 34 ms | 7% |
 | postprocess (what I rewrote) | 12 ms | **2.4%** |
 
-The budget is missed by YOLOv8s on a 15 W mobile CPU, not by the pipeline
-around it. YOLOv8n would fit the budget at a cost in accuracy; that trade has
-not been made because the accuracy is what is being measured. The criterion was
-optimistic when it was written and it is left standing, marked as missed.
+The budget is missed by the forward pass on a 15 W mobile CPU, not by the
+pipeline around it, and **not by the choice of model**: the measurement above
+shows YOLOv8n misses it too. The criterion was optimistic when it was written
+and it is left standing, marked as missed, rather than quietly relaxed to
+whatever the hardware happens to deliver.
 
 ## M5: would the simulation have told you the same thing?
 
@@ -225,10 +255,10 @@ on the wrong half.
 
 | class | AP@0.3 | AP@0.5 | **AP@0.7** | found | mislocated | unseen | of misses, a box problem |
 |---|---|---|---|---|---|---|---|
-| Car | 0.852 | 0.754 | **0.532** | 4566 | 735 | 278 | **73%** |
-| Pedestrian | 0.583 | 0.495 | **0.272** | 599 | 138 | 156 | 47% |
+| Car | 0.849 | 0.754 | **0.525** | 23511 | 3839 | 1392 | **73%** |
+| Pedestrian | 0.596 | 0.506 | **0.266** | 3084 | 682 | 721 | 49% |
 
-**Only 278 of 5579 cars were not seen at all.** 73% of Car misses are boxes the
+**Only 1392 of 28742 cars were not seen at all.** 73% of Car misses are boxes the
 detector emitted on the object that did not overlap enough to score. The fix is
 box regression, not recall, and that is the opposite of what the aggregate AP
 suggests. Pedestrians split roughly evenly, so half of *that* problem really is
@@ -251,11 +281,11 @@ right for comparing two detectors and useless for shipping one, because a
 vehicle runs at a single threshold. Choosing it is the decision that turns an
 evaluation into an engineering argument.
 
-**Pedestrian recall tops out at 67.1% at ANY threshold.**
+**Pedestrian recall tops out at 68.7% at ANY threshold.**
 
 | target recall | threshold | precision | false alarms / frame |
 |---|---|---|---|
-| 50% | 0.502 | 0.621 | 0.19 |
+| 50% | 0.522 | 0.660 | 0.15 |
 | 70% | **unreachable** | | |
 | 90% | **unreachable** | | |
 
@@ -269,12 +299,12 @@ consequential thing this evaluation does.
 
 | target recall | threshold | precision | false alarms / frame |
 |---|---|---|---|
-| 50% | 0.670 | 0.956 | 0.09 |
-| 70% | 0.436 | 0.850 | 0.46 |
-| 80% | 0.136 | 0.571 | **2.24** |
+| 50% | 0.681 | 0.955 | 0.09 |
+| 70% | 0.413 | 0.834 | 0.54 |
+| 80% | 0.129 | 0.563 | **2.39** |
 | 90% | **unreachable** | | |
 
-A 1.6x gain in recall bought with a **25x** rise in phantom detections. At 2.24
+A 1.6x gain in recall bought with a **26x** rise in phantom detections. At 2.39
 false alarms per frame, a vehicle running ten frames a second reacts to
 something imaginary twenty-two times a second.
 
@@ -300,15 +330,15 @@ that a number was low.
 
 | | Condition | Evidence |
 |---|---|---|
-| TC-01 | Pedestrian beyond ~30 m | AP 0.689 → 0.361 → 0.069 → 0.007 → 0.000 by range |
+| TC-01 | Pedestrian beyond ~30 m | AP 0.709 → 0.372 → 0.076 → 0.010 → 0.000 by range |
 | TC-02 | Occlusion, the strongest predictor measured | Pedestrian 0.642 → 0.188 → 0.023 |
 | TC-03 | Small apparent size, independent of range | Pedestrian under 40 px: 0.005 |
 | TC-04 | Vehicles beyond 50 m | Car 0.900 → 0.172 |
 | TC-05 | Truncation costs pedestrians, not cars | Car flat at 0.72-0.75; Pedestrian 0.479 → 0.103 |
 | TC-06 | The class mapping cannot represent a cyclist | AP 0.006, a measurement artefact, not a detector limit |
-| TC-07 | Pedestrian recall has a ceiling no threshold reaches | 67.1% at any operating point |
-| TC-08 | Recall is bought with false alarms faster than linearly | Car 0.09 to 2.24 per frame for 50% to 80% |
-| TC-09 | Vehicles are found but boxed loosely | AP 0.852 to 0.532 across IoU 0.3 to 0.7; 73% of misses are box problems |
+| TC-07 | Pedestrian recall has a ceiling no threshold reaches | 68.7% at any operating point |
+| TC-08 | Recall is bought with false alarms faster than linearly | Car 0.09 to 2.39 per frame for 50% to 80% |
+| TC-09 | Vehicles are found but boxed loosely | AP 0.849 to 0.525 across IoU 0.3 to 0.7; 73% of misses are box problems |
 
 **A negative result is recorded in the same file**: horizontal position in the
 frame predicts nothing (Car 0.715 / 0.705 / 0.680 across thirds). A taxonomy
