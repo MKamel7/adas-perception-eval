@@ -105,10 +105,10 @@ def main() -> int:
     detector = Detector(args.model, score_threshold=0.05, threads=args.threads)
     real = json.loads(args.real.read_text(encoding="utf-8"))
 
-    print(f"THE FINDING THAT NEEDS NO INFERENCE:\n"
-          f"  Virtual KITTI 2 annotates Car, Van and Truck. It contains no\n"
-          f"  pedestrians, so this project's headline result cannot be checked\n"
-          f"  against it at all.\n")
+    print("THE FINDING THAT NEEDS NO INFERENCE:\n"
+          "  Virtual KITTI 2 annotates Car, Van and Truck. It contains no\n"
+          "  pedestrians, so this project's headline result cannot be checked\n"
+          "  against it at all.\n")
 
     results = []
     for variant in available:
@@ -138,7 +138,7 @@ def main() -> int:
         synthetic = {k: v["ap"] for k, v in baseline["slices"]["distance"].items()}
         shared = [b for b in real_distance if b in synthetic]
 
-        print(f"\nCar by distance, real against synthetic baseline:")
+        print("\nCar by distance, real against synthetic baseline:")
         print(f"{'band':<12} {'real':>8} {'synthetic':>10}")
         for band in shared:
             print(f"{band:<12} {real_distance[band]:>8.3f} {synthetic[band]:>10.3f}")
