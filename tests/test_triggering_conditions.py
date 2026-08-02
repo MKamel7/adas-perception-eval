@@ -283,6 +283,50 @@ def test_a_tighter_threshold_is_quieter_and_finds_less() -> None:
                     >= tighter["false_alarms_per_frame"])
 
 
+@pytest.mark.demonstrates("TC-09")
+def test_cars_are_seen_but_boxed_loosely() -> None:
+    """Where the effort should go, and it is the opposite of what the
+    aggregate suggests."""
+    data = results()
+    car = data["diagnosis"]["Car"]
+
+    assert car["mislocation_share"] > 0.6, (
+        f"only {car['mislocation_share']:.0%} of Car misses are box problems; "
+        f"TC-09 claims most of them are")
+    assert car["unseen"] < car["total"] * 0.1, (
+        "the claim is that very few cars are missed outright")
+
+    tight = data["at_iou"]["0.7"]["Car"]
+    loose = data["at_iou"]["0.3"]["Car"]
+    assert loose - tight > 0.25, (
+        f"AP moved only {loose - tight:.3f} between IoU 0.3 and 0.7, so Car "
+        f"detection is not threshold-sensitive and TC-09 overstates it")
+
+
+@pytest.mark.demonstrates("TC-09")
+def test_pedestrian_misses_are_not_mostly_a_box_problem() -> None:
+    """The contrast that makes TC-09 a finding rather than a truism.
+
+    If every class behaved this way it would be a property of the IoU
+    convention. Pedestrians split roughly evenly, so half of that problem is
+    genuine blindness and the two classes need different work.
+    """
+    data = results()
+
+    assert data["diagnosis"]["Pedestrian"]["mislocation_share"] < 0.6
+    assert (data["diagnosis"]["Car"]["mislocation_share"]
+            > data["diagnosis"]["Pedestrian"]["mislocation_share"] + 0.15)
+
+
+def test_average_precision_falls_as_the_overlap_requirement_tightens() -> None:
+    """Monotonicity across the sweep. A rise would mean the thresholds are
+    being applied backwards."""
+    data = results()
+    for label in ("Car", "Pedestrian"):
+        aps = [data["at_iou"][k][label] for k in ("0.3", "0.5", "0.7")]
+        assert aps == sorted(aps, reverse=True), f"{label}: {aps}"
+
+
 # --- every number in the file, not a hand-picked two -------------------------
 def evidence_entries() -> list[tuple[str, dict]]:
     return [(c["id"], e) for c in analysis()["conditions"] for e in c["evidence"]]
@@ -312,6 +356,10 @@ def test_every_claimed_number_matches_the_evaluation(cid: str, entry: dict) -> N
         actual = float(data["overall"][entry["class"]])
     elif entry["slice"] == "ceiling":
         actual = float(data["ceiling_recall"][entry["class"]])
+    elif entry["slice"] == "iou":
+        actual = float(data["at_iou"][entry["bin"]][entry["class"]])
+    elif entry["slice"] == "mislocation share":
+        actual = float(data["diagnosis"][entry["class"]]["mislocation_share"])
     elif entry["slice"] == "false alarms per frame":
         target = float(entry["bin"].split()[-1])
         point = next(p for p in data["operating_points"][entry["class"]]

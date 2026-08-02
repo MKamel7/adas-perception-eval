@@ -25,6 +25,7 @@ Every condition traces up to a hazard and down to at least one test that recompu
 | TC-06 | The class mapping cannot represent a cyclist | H-3 | overall | 1 | `test_the_cyclist_number_is_reported_and_disclaimed` |
 | TC-07 | Pedestrian recall has a ceiling no threshold reaches | H-1 | ceiling | 1 | `test_pedestrian_recall_has_a_ceiling_no_threshold_reaches` |
 | TC-08 | Buying recall costs false alarms faster than linearly | H-4 | false alarms per frame | 2 | `test_recall_is_bought_with_false_alarms_faster_than_linearly`<br>`test_a_tighter_threshold_is_quieter_and_finds_less` |
+| TC-09 | Vehicles are found but boxed loosely | H-2 | iou, mislocation share | 4 | `test_cars_are_seen_but_boxed_loosely`<br>`test_pedestrian_misses_are_not_mostly_a_box_problem` |
 
 ## Slices that showed nothing
 
@@ -35,6 +36,6 @@ Recorded because a taxonomy containing only the slices that worked is a fishing 
 ## Coverage
 
 - Hazards: **4**
-- Triggering conditions: **8**
-- Tests demonstrating a condition: **12**
-- Measured figures, every one checked against the evaluation: **32**
+- Triggering conditions: **9**
+- Tests demonstrating a condition: **14**
+- Measured figures, every one checked against the evaluation: **36**

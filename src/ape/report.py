@@ -24,6 +24,7 @@ from datetime import UTC, datetime
 from ape.cache import Header
 from ape.classes import EVALUATED, HEADLINE
 from ape.evaluate import Evaluation, operating_table
+from ape.localisation import THRESHOLDS
 from ape.slices import DIMENSIONS
 
 STYLE = """
@@ -132,6 +133,37 @@ def render(result: Evaluation, header: Header) -> str:
             _cell(classes[c].average_precision, classes[c].positives, True)
             for c in EVALUATED) + f"<td>{objects}</td></tr>")
     rows.append("</tbody></table></div>")
+
+    # Not seen, or seen and boxed badly?
+    rows.append("<h2>Was it missed, or just boxed badly?</h2>")
+    rows.append('<p class="q">Two failures with different fixes, reported as '
+                'one number everywhere else on this page.</p>')
+    rows.append('<div class="scroll"><table><thead><tr><th>class</th>'
+                + "".join(f"<th>AP@{t:g}</th>" for t in THRESHOLDS)
+                + "<th>found</th><th>mislocated</th><th>unseen</th>"
+                "<th>of misses, a box problem</th></tr></thead><tbody>")
+    for label in EVALUATED:
+        d = result.diagnosis.get(label)
+        if d is None or not d.total:
+            continue
+        share = ("n/a" if d.mislocation_share != d.mislocation_share
+                 else f"{d.mislocation_share:.0%}")
+        rows.append(
+            f"<tr><td>{e(label)}</td>"
+            + "".join(f"<td>{result.at_iou.get(t, {}).get(label, float('nan')):.3f}</td>"
+                      for t in THRESHOLDS)
+            + f"<td>{d.found_tight}</td><td>{d.mislocated}</td>"
+            f"<td>{d.unseen}</td><td>{share}</td></tr>")
+    rows.append("</tbody></table></div>")
+    rows.append('<div class="note">A box emitted on the object that did not '
+                'overlap enough to score is a different failure from nothing '
+                'being emitted at all. The first is answered with box '
+                'regression and the detector already knows the object is '
+                'there; the second is answered with recall, or a different '
+                'sensor. For a safety argument they are not equally alarming: '
+                'a system that knows something is roughly there can still brake '
+                "for it. <b>AP@0.7 is KITTI's own threshold for Car</b>, so "
+                'that column is the one comparable with the KITTI benchmark.</div>')
 
     # Where would you set the threshold, and what does it cost?
     rows.append("<h2>Choosing an operating point</h2>")

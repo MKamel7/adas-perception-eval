@@ -92,6 +92,16 @@ def main() -> int:
             print(f"  {label}: best {best:.3f} ({where_best}), "
                   f"worst {worst:.3f} ({where_worst}), {spread}")
 
+    print("\nwas it missed, or just boxed badly?")
+    for label in HEADLINE:
+        diagnosis = result.diagnosis[label]
+        aps = "  ".join(f"AP@{k:g} {v[label]:.3f}"
+                        for k, v in sorted(result.at_iou.items()))
+        print(f"  {label:<11} {aps}")
+        print(f"              {diagnosis.found_tight} found, "
+              f"{diagnosis.mislocated} mislocated, {diagnosis.unseen} unseen "
+              f"-> {diagnosis.mislocation_share:.0%} of misses are a box problem")
+
     print("\nchoosing an operating point (AP integrates over all of them; "
           "a vehicle runs at one)")
     for label in HEADLINE:
@@ -116,6 +126,11 @@ def main() -> int:
         "by_difficulty": {tier: {k: v.average_precision for k, v in cls.items()}
                           for tier, cls in result.by_difficulty.items()},
         "ceiling_recall": result.ceiling,
+        "at_iou": {str(k): v for k, v in result.at_iou.items()},
+        "diagnosis": {k: {"total": d.total, "found": d.found_tight,
+                          "mislocated": d.mislocated, "unseen": d.unseen,
+                          "mislocation_share": d.mislocation_share}
+                      for k, d in result.diagnosis.items()},
         "operating_points": {
             label: [{"target": target,
                      "threshold": p.threshold if p else None,

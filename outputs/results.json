@@ -45,6 +45,46 @@
     "Pedestrian": 0.6707726763717805,
     "Cyclist": 0.06158357771260997
   },
+  "at_iou": {
+    "0.3": {
+      "Car": 0.8517965024326172,
+      "Pedestrian": 0.5829619754339694,
+      "Cyclist": 0.0925914719916722
+    },
+    "0.5": {
+      "Car": 0.7542207792748816,
+      "Pedestrian": 0.49540333912050905,
+      "Cyclist": 0.005824770479132025
+    },
+    "0.7": {
+      "Car": 0.5324363495668822,
+      "Pedestrian": 0.271691698666781,
+      "Cyclist": 5.156765676567656e-05
+    }
+  },
+  "diagnosis": {
+    "Car": {
+      "total": 5579,
+      "found": 4566,
+      "mislocated": 735,
+      "unseen": 278,
+      "mislocation_share": 0.7255676209279368
+    },
+    "Pedestrian": {
+      "total": 893,
+      "found": 599,
+      "mislocated": 138,
+      "unseen": 156,
+      "mislocation_share": 0.46938775510204084
+    },
+    "Cyclist": {
+      "total": 341,
+      "found": 21,
+      "mislocated": 65,
+      "unseen": 255,
+      "mislocation_share": 0.203125
+    }
+  },
   "operating_points": {
     "Car": [
       {

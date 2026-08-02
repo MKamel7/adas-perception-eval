@@ -48,6 +48,14 @@ td.thin::after { content:" ~"; }
 <tr><td>moderate</td><td><span class="bar" style="width:53px"></span>0.882</td><td><span class="bar" style="width:36px"></span>0.594</td><td><span class="bar" style="width:1px"></span>0.004</td><td>4018</td></tr>
 <tr><td>hard</td><td><span class="bar" style="width:46px"></span>0.772</td><td><span class="bar" style="width:30px"></span>0.501</td><td><span class="bar" style="width:1px"></span>0.006</td><td>5296</td></tr>
 </tbody></table></div>
+<h2>Was it missed, or just boxed badly?</h2>
+<p class="q">Two failures with different fixes, reported as one number everywhere else on this page.</p>
+<div class="scroll"><table><thead><tr><th>class</th><th>AP@0.3</th><th>AP@0.5</th><th>AP@0.7</th><th>found</th><th>mislocated</th><th>unseen</th><th>of misses, a box problem</th></tr></thead><tbody>
+<tr><td>Car</td><td>0.852</td><td>0.754</td><td>0.532</td><td>4566</td><td>735</td><td>278</td><td>73%</td></tr>
+<tr><td>Pedestrian</td><td>0.583</td><td>0.495</td><td>0.272</td><td>599</td><td>138</td><td>156</td><td>47%</td></tr>
+<tr><td>Cyclist</td><td>0.093</td><td>0.006</td><td>0.000</td><td>21</td><td>65</td><td>255</td><td>20%</td></tr>
+</tbody></table></div>
+<div class="note">A box emitted on the object that did not overlap enough to score is a different failure from nothing being emitted at all. The first is answered with box regression and the detector already knows the object is there; the second is answered with recall, or a different sensor. For a safety argument they are not equally alarming: a system that knows something is roughly there can still brake for it. <b>AP@0.7 is KITTI's own threshold for Car</b>, so that column is the one comparable with the KITTI benchmark.</div>
 <h2>Choosing an operating point</h2>
 <p class="q">Average precision integrates over every confidence threshold. A vehicle runs at one. This is what each choice would cost.</p>
 <h3>Car</h3>
@@ -122,4 +130,4 @@ td.thin::after { content:" ~"; }
 </tbody></table></div>
 <div class="note">The small figures under each number are a 95% confidence interval from resampling FRAMES, not objects: people standing in one group are not independent observations, and resampling objects would understate the range. Two cells whose intervals do not overlap differ by more than the sample explains. Two whose intervals DO overlap are not thereby shown to be the same, which is a weaker statement than it looks. A tilde still marks a cell computed from fewer than ten objects.</div>
 <h2>What this does not claim</h2><div class="note">Cyclist is reported but excluded from the headline: KITTI annotates a rider and bicycle as one box and a COCO detector emits two, so that number measures box convention as much as detection. The IoU threshold is 0.5 for every class, where KITTI's own benchmark uses 0.7 for Car. Average precision follows COCO 101-point interpolation, not KITTI 40-point, so these figures are not directly comparable to the KITTI leaderboard. SOTIF vocabulary is borrowed; its process is not performed and no compliance is claimed.</div>
-<p class="meta">Generated 2026-08-02 10:17 UTC from 1500 frames, 000000 to 001499, detections kept above score 0.05. The mAP implementation is checked against pycocotools to within 0.001 by the test suite.</p></main></body></html>
+<p class="meta">Generated 2026-08-02 10:56 UTC from 1500 frames, 000000 to 001499, detections kept above score 0.05. The mAP implementation is checked against pycocotools to within 0.001 by the test suite.</p></main></body></html>

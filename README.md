@@ -217,6 +217,33 @@ Fog costs four times what rain does. Overcast is very slightly *better* than the
 baseline render. These are synthetic weather effects and are labelled as such:
 they are evidence about a renderer's fog, not about fog.
 
+## Was it missed, or just boxed badly?
+
+Everything above counts a miss as a miss. At IoU 0.5 that conflates two failures
+with different fixes, and reporting them as one number sends an engineer to work
+on the wrong half.
+
+| class | AP@0.3 | AP@0.5 | **AP@0.7** | found | mislocated | unseen | of misses, a box problem |
+|---|---|---|---|---|---|---|---|
+| Car | 0.852 | 0.754 | **0.532** | 4566 | 735 | 278 | **73%** |
+| Pedestrian | 0.583 | 0.495 | **0.272** | 599 | 138 | 156 | 47% |
+
+**Only 278 of 5579 cars were not seen at all.** 73% of Car misses are boxes the
+detector emitted on the object that did not overlap enough to score. The fix is
+box regression, not recall, and that is the opposite of what the aggregate AP
+suggests. Pedestrians split roughly evenly, so half of *that* problem really is
+blindness, which corroborates the recall ceiling below.
+
+For a safety argument the two are not equally alarming: a system that knows a
+vehicle is roughly there can still brake for it. But a box 40% off feeds a wrong
+position to whatever consumes it, so a tracker can place the vehicle in the
+wrong lane with full confidence. The hazard shifts from a missed reaction to a
+confidently wrong one.
+
+**AP@0.7 is KITTI's own threshold for Car**, so that column is directly
+comparable with the KITTI benchmark. This removes a limitation the README used
+to carry.
+
 ## Where would you set the threshold?
 
 Average precision integrates over every confidence threshold at once. That is
@@ -265,7 +292,7 @@ repository.
 
 ## The SOTIF taxonomy, and the gate under it
 
-`safety/triggering_conditions.yaml` records eight triggering conditions against
+`safety/triggering_conditions.yaml` records nine triggering conditions against
 four hazards. SOTIF's device is four areas, known-safe, known-unsafe,
 unknown-safe and **unknown-unsafe**, and the whole job is shrinking the last.
 Each condition therefore states what it moved out of unknown-unsafe, not just
@@ -281,6 +308,7 @@ that a number was low.
 | TC-06 | The class mapping cannot represent a cyclist | AP 0.006, a measurement artefact, not a detector limit |
 | TC-07 | Pedestrian recall has a ceiling no threshold reaches | 67.1% at any operating point |
 | TC-08 | Recall is bought with false alarms faster than linearly | Car 0.09 to 2.24 per frame for 50% to 80% |
+| TC-09 | Vehicles are found but boxed loosely | AP 0.852 to 0.532 across IoU 0.3 to 0.7; 73% of misses are box problems |
 
 **A negative result is recorded in the same file**: horizontal position in the
 frame predicts nothing (Car 0.715 / 0.705 / 0.680 across thirds). A taxonomy

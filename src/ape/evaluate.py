@@ -16,6 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ape.classes import EVALUATED, HEADLINE, neutral_labels
+from ape.localisation import THRESHOLDS, Diagnosis, diagnose
 from ape.match import Assignment, assign, assign_by_frame, at_difficulty, in_slice
 from ape.metrics import Curve, average_precision, mean_average_precision
 from ape.operating import Point, best_recall, sweep, threshold_for_recall
@@ -80,6 +81,13 @@ class Evaluation:
     #: class -> the most recall reachable at ANY threshold. Below a target,
     #: no threshold choice helps and the answer is a different sensor.
     ceiling: dict[str, float] = field(default_factory=dict)
+    #: iou threshold -> class -> AP. 0.7 is KITTI's own for Car, so this is
+    #: what makes the numbers comparable with the KITTI benchmark instead of
+    #: only with each other.
+    at_iou: dict[float, dict[str, float]] = field(default_factory=dict)
+    #: class -> why the objects missed at IoU 0.5 were missed. Not seen at all,
+    #: or seen and boxed badly: different fixes, different severities.
+    diagnosis: dict[str, Diagnosis] = field(default_factory=dict)
 
     @property
     def headline(self) -> float:
@@ -131,6 +139,13 @@ def evaluate(detections: dict[str, list[Detection]],
             assign(detections, truth, label, neutral, iou))
         result.overall_interval[label] = bootstrap(
             assign_by_frame(detections, truth, label, neutral, iou))
+
+        for threshold in THRESHOLDS:
+            result.at_iou.setdefault(threshold, {})[label] = average_precision(
+                assign(detections, truth, label, neutral, threshold)
+            ).average_precision
+        result.diagnosis[label] = diagnose(detections, truth, label, neutral,
+                                           tight=iou)
 
         whole = assign(detections, truth, label, neutral, iou)
         result.curve_points[label] = sweep(whole, len(truth))

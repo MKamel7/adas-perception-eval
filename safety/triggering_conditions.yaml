@@ -227,6 +227,33 @@ conditions:
       Prices the recall the safety case is asking for, instead of leaving the
       threshold as an unstated assumption somebody sets later by feel.
 
+  - id: TC-09
+    hazard: H-2
+    title: Vehicles are found but boxed loosely
+    text: >
+      Car detection is far more sensitive to the overlap threshold than to the
+      detector's ability to see. AP falls from 0.852 at IoU 0.3 to 0.532 at
+      0.7, and of the objects missed at 0.5, 73% had a box emitted on them that
+      simply did not overlap enough. Only 278 of 5579 cars were not seen at all.
+    evidence:
+      - {slice: 'iou', class: Car, bin: '0.3', ap: 0.852}
+      - {slice: 'iou', class: Car, bin: '0.5', ap: 0.754}
+      - {slice: 'iou', class: Car, bin: '0.7', ap: 0.532}
+      - {slice: 'mislocation share', class: Car, bin: 'iou 0.5',
+         ap: 0.726}
+    why_it_matters: >
+      A mislocated box and an absent one are not equally dangerous. A system
+      that knows a vehicle is roughly there can still brake for it, while one
+      that saw nothing cannot. But a box that is 40% off feeds a wrong position
+      to whatever consumes it, so a tracker or a lane assignment can place the
+      vehicle in the wrong lane with full confidence. The hazard shifts from a
+      missed reaction to a confidently wrong one.
+    unknown_to_known: >
+      Says where the effort goes. For cars the answer is box regression and not
+      recall, which is the cheaper fix, and it is the opposite of what the
+      aggregate AP would have suggested. For pedestrians the split is 47% and
+      53%, so half of that problem really is blindness.
+
 # Deliberately recorded because it did NOT show an effect. A taxonomy that only
 # contains the slices that worked is a fishing expedition with the evidence
 # removed, so the negative result is kept in the same file as the positives.
