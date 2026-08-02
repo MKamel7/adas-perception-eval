@@ -17,6 +17,7 @@ test names a condition that does not exist.
 
 from __future__ import annotations
 
+import itertools
 import json
 from pathlib import Path
 
@@ -222,6 +223,66 @@ def test_a_thin_slice_reports_a_wide_interval() -> None:
         f"hundreds of objects, which is too wide to be believable")
 
 
+# --- the operating point, which average precision cannot express -------------
+@pytest.mark.demonstrates("TC-07")
+def test_pedestrian_recall_has_a_ceiling_no_threshold_reaches() -> None:
+    """The most consequential thing this evaluation says.
+
+    A limit no operating point reaches is not a tuning problem. Distinguishing
+    "lower the threshold" from "you cannot get there from here" is the
+    difference between a sprint spent moving a number and a decision to add a
+    sensor, and average precision alone cannot tell them apart.
+    """
+    data = results()
+    ceiling = float(data["ceiling_recall"]["Pedestrian"])
+
+    assert ceiling < 0.75, (
+        f"pedestrian recall now tops out at {ceiling:.3f}; TC-07 claims a "
+        f"ceiling that leaves a substantial fraction unreported")
+
+    for point in data["operating_points"]["Pedestrian"]:
+        if point["target"] > ceiling:
+            assert not point["reachable"], (
+                f"{point['target']:.0%} is above the ceiling {ceiling:.3f} and "
+                f"must be reported unreachable, not approximated")
+
+
+@pytest.mark.demonstrates("TC-08")
+def test_recall_is_bought_with_false_alarms_faster_than_linearly() -> None:
+    """Both directions are hazards.
+
+    A taxonomy that only counted misses would be arguing for a threshold of
+    zero, which would brake continuously. This pins the price of the recall the
+    safety case keeps asking for.
+    """
+    data = results()
+    points = {p["target"]: p for p in data["operating_points"]["Car"]}
+    low, high = points[0.50], points[0.80]
+
+    assert low["reachable"] and high["reachable"]
+    recall_gain = 0.80 / 0.50
+    alarm_growth = high["false_alarms_per_frame"] / low["false_alarms_per_frame"]
+
+    assert alarm_growth > recall_gain * 5, (
+        f"recall rose {recall_gain:.1f}x and false alarms {alarm_growth:.1f}x; "
+        f"TC-08 claims the cost grows much faster than the benefit")
+    assert high["false_alarms_per_frame"] > 1.0, (
+        "the claim is that 80% recall costs more than one phantom detection "
+        "per frame")
+
+
+@pytest.mark.demonstrates("TC-08")
+def test_a_tighter_threshold_is_quieter_and_finds_less() -> None:
+    """There is no free recall, and the table has to show that."""
+    data = results()
+    for label in ("Car", "Pedestrian"):
+        reachable = [p for p in data["operating_points"][label] if p["reachable"]]
+        for tighter, looser in itertools.pairwise(reachable):
+            assert looser["threshold"] <= tighter["threshold"]
+            assert (looser["false_alarms_per_frame"]
+                    >= tighter["false_alarms_per_frame"])
+
+
 # --- every number in the file, not a hand-picked two -------------------------
 def evidence_entries() -> list[tuple[str, dict]]:
     return [(c["id"], e) for c in analysis()["conditions"] for e in c["evidence"]]
@@ -249,6 +310,13 @@ def test_every_claimed_number_matches_the_evaluation(cid: str, entry: dict) -> N
 
     if entry["slice"] == "overall":
         actual = float(data["overall"][entry["class"]])
+    elif entry["slice"] == "ceiling":
+        actual = float(data["ceiling_recall"][entry["class"]])
+    elif entry["slice"] == "false alarms per frame":
+        target = float(entry["bin"].split()[-1])
+        point = next(p for p in data["operating_points"][entry["class"]]
+                     if abs(p["target"] - target) < 1e-9)
+        actual = float(point["false_alarms_per_frame"])
     else:
         actual = ap(data, entry["slice"], entry["bin"], entry["class"])
 

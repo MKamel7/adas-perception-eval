@@ -10,6 +10,7 @@ body { margin:0; padding:2.5rem 1.25rem 5rem; background:var(--bg); color:var(--
 main { max-width:70rem; margin:0 auto; }
 h1 { font-size:1.6rem; margin:0 0 .25rem; letter-spacing:-.01em; }
 h2 { font-size:1.15rem; margin:2.75rem 0 .4rem; letter-spacing:-.01em; }
+h3 { font-size:.95rem; margin:1.5rem 0 .3rem; font-weight:600; }
 p.sub { color:var(--dim); margin:0 0 2rem; }
 p.q { color:var(--dim); margin:.1rem 0 .8rem; font-style:italic; }
 .meta { color:var(--dim); font-size:.85rem; border-top:1px solid var(--line);
@@ -47,6 +48,27 @@ td.thin::after { content:" ~"; }
 <tr><td>moderate</td><td><span class="bar" style="width:53px"></span>0.882</td><td><span class="bar" style="width:36px"></span>0.594</td><td><span class="bar" style="width:1px"></span>0.004</td><td>4018</td></tr>
 <tr><td>hard</td><td><span class="bar" style="width:46px"></span>0.772</td><td><span class="bar" style="width:30px"></span>0.501</td><td><span class="bar" style="width:1px"></span>0.006</td><td>5296</td></tr>
 </tbody></table></div>
+<h2>Choosing an operating point</h2>
+<p class="q">Average precision integrates over every confidence threshold. A vehicle runs at one. This is what each choice would cost.</p>
+<h3>Car</h3>
+<div class="note">The most that can be found at ANY threshold is <b>81.8%</b> recall. A target above that is not a threshold problem and no operating point fixes it.</div>
+<div class="scroll"><table><thead><tr><th>target recall</th><th>threshold</th><th>precision</th><th>false alarms per frame</th><th>pedestrians missed</th></tr></thead><tbody>
+<tr><td>50%</td><td>0.670</td><td>0.956</td><td>0.09</td><td>2719</td></tr>
+<tr><td>70%</td><td>0.436</td><td>0.850</td><td>0.46</td><td>1665</td></tr>
+<tr><td>80%</td><td>0.136</td><td>0.571</td><td>2.24</td><td>1112</td></tr>
+<tr><td>90%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
+<tr><td>95%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
+</tbody></table></div>
+<h3>Pedestrian</h3>
+<div class="note">The most that can be found at ANY threshold is <b>67.1%</b> recall. A target above that is not a threshold problem and no operating point fixes it.</div>
+<div class="scroll"><table><thead><tr><th>target recall</th><th>threshold</th><th>precision</th><th>false alarms per frame</th><th>pedestrians missed</th></tr></thead><tbody>
+<tr><td>50%</td><td>0.502</td><td>0.621</td><td>0.19</td><td>435</td></tr>
+<tr><td>70%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
+<tr><td>80%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
+<tr><td>90%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
+<tr><td>95%</td><td colspan="4" class="bad">unreachable at any threshold</td></tr>
+</tbody></table></div>
+<div class="note">Both directions are hazards. A threshold too high leaves objects unreported; one too low makes the vehicle react to things that are not there. The false alarm rate is given per frame rather than as precision because "one phantom detection every four frames" is a quantity an integrator can reason about and "precision 0.82" is not. No threshold is recommended here: that depends on the vehicle, the speed and the function, none of which are in this repository.</div>
 <h2>By difficulty</h2>
 <p class="q">Does the benchmark&#x27;s own notion of difficulty predict failure?</p>
 <div class="scroll"><table><thead><tr><th>difficulty</th><th>Car</th><th>Pedestrian</th><th>Cyclist</th><th>objects</th></tr></thead><tbody>
@@ -100,4 +122,4 @@ td.thin::after { content:" ~"; }
 </tbody></table></div>
 <div class="note">The small figures under each number are a 95% confidence interval from resampling FRAMES, not objects: people standing in one group are not independent observations, and resampling objects would understate the range. Two cells whose intervals do not overlap differ by more than the sample explains. Two whose intervals DO overlap are not thereby shown to be the same, which is a weaker statement than it looks. A tilde still marks a cell computed from fewer than ten objects.</div>
 <h2>What this does not claim</h2><div class="note">Cyclist is reported but excluded from the headline: KITTI annotates a rider and bicycle as one box and a COCO detector emits two, so that number measures box convention as much as detection. The IoU threshold is 0.5 for every class, where KITTI's own benchmark uses 0.7 for Car. Average precision follows COCO 101-point interpolation, not KITTI 40-point, so these figures are not directly comparable to the KITTI leaderboard. SOTIF vocabulary is borrowed; its process is not performed and no compliance is claimed.</div>
-<p class="meta">Generated 2026-08-02 10:01 UTC from 1500 frames, 000000 to 001499, detections kept above score 0.05. The mAP implementation is checked against pycocotools to within 0.001 by the test suite.</p></main></body></html>
+<p class="meta">Generated 2026-08-02 10:17 UTC from 1500 frames, 000000 to 001499, detections kept above score 0.05. The mAP implementation is checked against pycocotools to within 0.001 by the test suite.</p></main></body></html>

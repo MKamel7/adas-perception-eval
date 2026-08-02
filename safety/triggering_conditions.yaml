@@ -40,6 +40,17 @@ hazards:
       go unmitigated, which is why it is listed as a hazard rather than as a
       process complaint.
 
+  - id: H-4
+    text: >
+      The vehicle reacts to an object that is not there, because perception
+      reported a detection with nothing behind it.
+    harm: >
+      Unnecessary intervention. Phantom braking on a motorway is the sharp
+      case, and it is a collision risk in its own right rather than a comfort
+      complaint. Listed because every other hazard here is about failing to
+      react, and a taxonomy containing only those would be arguing for a
+      confidence threshold of zero.
+
 conditions:
   - id: TC-01
     hazard: H-1
@@ -173,6 +184,48 @@ conditions:
     unknown_to_known: >
       Records that a class exists which this pipeline cannot currently measure,
       which is a known gap rather than a silently absent one.
+
+  - id: TC-07
+    hazard: H-1
+    title: Pedestrian recall has a ceiling no threshold reaches
+    text: >
+      The most that can be found at ANY confidence threshold is 67.1% of
+      pedestrians. This is not a tuning question. Lowering the threshold to
+      zero, accepting every box the detector emits, still leaves a third of
+      annotated pedestrians unreported.
+    evidence:
+      - {slice: 'ceiling', class: Pedestrian, bin: 'any threshold',
+         ap: 0.671}
+    why_it_matters: >
+      A limit that no operating point reaches cannot be answered with a
+      different number. It is answered with a different sensor, a second
+      modality, or a restricted operational domain. Distinguishing "tune it"
+      from "you cannot get there from here" is the most consequential thing
+      this evaluation says, and average precision alone does not say it.
+    unknown_to_known: >
+      Turns a tuning discussion into an architecture one, before anybody spends
+      a sprint moving a threshold that was never going to work.
+
+  - id: TC-08
+    hazard: H-4
+    title: Buying recall costs false alarms faster than linearly
+    text: >
+      Car recall can be pushed from 50% to 80%, and the false alarm rate rises
+      from 0.09 per frame to 2.24 over the same move: a 1.6x gain in recall
+      bought with a 25x rise in phantom detections.
+    evidence:
+      - {slice: 'false alarms per frame', class: Car, bin: 'recall 0.50',
+         ap: 0.089}
+      - {slice: 'false alarms per frame', class: Car, bin: 'recall 0.80',
+         ap: 2.239}
+    why_it_matters: >
+      At 2.24 false alarms per frame a vehicle running ten frames a second
+      would be reacting to something imaginary twenty-two times a second.
+      Reported per frame rather than as precision because that is the quantity
+      an integrator can hold against a phantom-braking budget.
+    unknown_to_known: >
+      Prices the recall the safety case is asking for, instead of leaving the
+      threshold as an unstated assumption somebody sets later by feel.
 
 # Deliberately recorded because it did NOT show an effect. A taxonomy that only
 # contains the slices that worked is a fishing expedition with the evidence

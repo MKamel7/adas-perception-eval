@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from ape.cache import load_detections  # noqa: E402
 from ape.classes import EVALUATED, HEADLINE  # noqa: E402
-from ape.evaluate import IOU, evaluate  # noqa: E402
+from ape.evaluate import IOU, evaluate, operating_table  # noqa: E402
 from ape.kitti import frame_ids, load_labels  # noqa: E402
 from ape.report import render  # noqa: E402
 
@@ -92,6 +92,19 @@ def main() -> int:
             print(f"  {label}: best {best:.3f} ({where_best}), "
                   f"worst {worst:.3f} ({where_worst}), {spread}")
 
+    print("\nchoosing an operating point (AP integrates over all of them; "
+          "a vehicle runs at one)")
+    for label in HEADLINE:
+        print(f"  {label}: ceiling {result.ceiling.get(label, 0):.1%} recall "
+              f"at any threshold")
+        for target, point in operating_table(result, label):
+            if point is None:
+                print(f"    {target:>5.0%}  UNREACHABLE")
+            else:
+                print(f"    {target:>5.0%}  threshold {point.threshold:.3f}  "
+                      f"precision {point.precision:.3f}  "
+                      f"{point.false_alarms_per_frame:.2f} false alarms/frame")
+
     args.json.parent.mkdir(parents=True, exist_ok=True)
     args.json.write_text(json.dumps({
         "model": header.model, "frames": result.frames,
@@ -102,6 +115,17 @@ def main() -> int:
                        for k, v in result.overall_interval.items()},
         "by_difficulty": {tier: {k: v.average_precision for k, v in cls.items()}
                           for tier, cls in result.by_difficulty.items()},
+        "ceiling_recall": result.ceiling,
+        "operating_points": {
+            label: [{"target": target,
+                     "threshold": p.threshold if p else None,
+                     "precision": p.precision if p else None,
+                     "false_alarms_per_frame": (p.false_alarms_per_frame
+                                                if p else None),
+                     "missed": p.missed if p else None,
+                     "reachable": p is not None}
+                    for target, p in operating_table(result, label)]
+            for label in EVALUATED},
         "slices": [{"dimension": s.dimension, "bin": s.bin,
                     "cells": [{"label": c.label,
                                "ap": c.curve.average_precision,

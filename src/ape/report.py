@@ -23,7 +23,7 @@ from datetime import UTC, datetime
 
 from ape.cache import Header
 from ape.classes import EVALUATED, HEADLINE
-from ape.evaluate import Evaluation
+from ape.evaluate import Evaluation, operating_table
 from ape.slices import DIMENSIONS
 
 STYLE = """
@@ -38,6 +38,7 @@ body { margin:0; padding:2.5rem 1.25rem 5rem; background:var(--bg); color:var(--
 main { max-width:70rem; margin:0 auto; }
 h1 { font-size:1.6rem; margin:0 0 .25rem; letter-spacing:-.01em; }
 h2 { font-size:1.15rem; margin:2.75rem 0 .4rem; letter-spacing:-.01em; }
+h3 { font-size:.95rem; margin:1.5rem 0 .3rem; font-weight:600; }
 p.sub { color:var(--dim); margin:0 0 2rem; }
 p.q { color:var(--dim); margin:.1rem 0 .8rem; font-style:italic; }
 .meta { color:var(--dim); font-size:.85rem; border-top:1px solid var(--line);
@@ -131,6 +132,43 @@ def render(result: Evaluation, header: Header) -> str:
             _cell(classes[c].average_precision, classes[c].positives, True)
             for c in EVALUATED) + f"<td>{objects}</td></tr>")
     rows.append("</tbody></table></div>")
+
+    # Where would you set the threshold, and what does it cost?
+    rows.append("<h2>Choosing an operating point</h2>")
+    rows.append('<p class="q">Average precision integrates over every '
+                'confidence threshold. A vehicle runs at one. This is what each '
+                'choice would cost.</p>')
+    for label in HEADLINE:
+        ceiling = result.ceiling.get(label, 0.0)
+        rows.append(f"<h3>{e(label)}</h3>")
+        rows.append(f'<div class="note">The most that can be found at ANY '
+                    f'threshold is <b>{ceiling:.1%}</b> recall. A target above '
+                    f'that is not a threshold problem and no operating point '
+                    f'fixes it.</div>')
+        rows.append('<div class="scroll"><table><thead><tr>'
+                    "<th>target recall</th><th>threshold</th><th>precision</th>"
+                    "<th>false alarms per frame</th><th>pedestrians missed</th>"
+                    "</tr></thead><tbody>")
+        for target, point in operating_table(result, label):
+            if point is None:
+                rows.append(f'<tr><td>{target:.0%}</td>'
+                            f'<td colspan="4" class="bad">unreachable at any '
+                            f'threshold</td></tr>')
+                continue
+            rows.append(
+                f"<tr><td>{target:.0%}</td><td>{point.threshold:.3f}</td>"
+                f"<td>{point.precision:.3f}</td>"
+                f"<td>{point.false_alarms_per_frame:.2f}</td>"
+                f"<td>{point.missed}</td></tr>")
+        rows.append("</tbody></table></div>")
+    rows.append('<div class="note">Both directions are hazards. A threshold too '
+                'high leaves objects unreported; one too low makes the vehicle '
+                'react to things that are not there. The false alarm rate is '
+                'given per frame rather than as precision because "one phantom '
+                'detection every four frames" is a quantity an integrator can '
+                'reason about and "precision 0.82" is not. No threshold is '
+                'recommended here: that depends on the vehicle, the speed and '
+                'the function, none of which are in this repository.</div>')
 
     # Slices
     for dimension in DIMENSIONS:

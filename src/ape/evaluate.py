@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from ape.classes import EVALUATED, HEADLINE, neutral_labels
 from ape.match import Assignment, assign, assign_by_frame, at_difficulty, in_slice
 from ape.metrics import Curve, average_precision, mean_average_precision
+from ape.operating import Point, best_recall, sweep, threshold_for_recall
 from ape.records import Detection, Difficulty, GroundTruth
 from ape.slices import DIMENSIONS
 from ape.uncertainty import Interval, bootstrap
@@ -73,6 +74,12 @@ class Evaluation:
     overall_interval: dict[str, Interval] = field(default_factory=dict)
     by_difficulty: dict[str, dict[str, Curve]] = field(default_factory=dict)
     slices: list[SliceResult] = field(default_factory=list)
+    #: class -> the operating-point curve. AP integrates over every threshold;
+    #: a vehicle runs at one, and this is where that choice becomes visible.
+    curve_points: dict[str, list[Point]] = field(default_factory=dict)
+    #: class -> the most recall reachable at ANY threshold. Below a target,
+    #: no threshold choice helps and the answer is a different sensor.
+    ceiling: dict[str, float] = field(default_factory=dict)
 
     @property
     def headline(self) -> float:
@@ -97,6 +104,21 @@ class Evaluation:
                 f"{worst[0].dimension}: {worst[0].bin}")
 
 
+#: The recall targets the report asks about. Not recommendations: what a
+#: function needs depends on the vehicle, the speed and the regulator, none of
+#: which are in this repository. They are the questions, and the table is the
+#: answer to each.
+RECALL_TARGETS = (0.50, 0.70, 0.80, 0.90, 0.95)
+
+
+def operating_table(result: Evaluation, label: str
+                    ) -> list[tuple[float, Point | None]]:
+    """What each target recall would cost, or that it cannot be bought."""
+    points = result.curve_points.get(label, [])
+    return [(target, threshold_for_recall(points, target))
+            for target in RECALL_TARGETS]
+
+
 def evaluate(detections: dict[str, list[Detection]],
              truth: dict[str, list[GroundTruth]],
              iou: float = IOU) -> Evaluation:
@@ -109,6 +131,10 @@ def evaluate(detections: dict[str, list[Detection]],
             assign(detections, truth, label, neutral, iou))
         result.overall_interval[label] = bootstrap(
             assign_by_frame(detections, truth, label, neutral, iou))
+
+        whole = assign(detections, truth, label, neutral, iou)
+        result.curve_points[label] = sweep(whole, len(truth))
+        result.ceiling[label] = best_recall(result.curve_points[label])
 
         for tier in (Difficulty.EASY, Difficulty.MODERATE, Difficulty.HARD):
             result.by_difficulty.setdefault(tier.value, {})[label] = \

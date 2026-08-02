@@ -217,10 +217,56 @@ Fog costs four times what rain does. Overcast is very slightly *better* than the
 baseline render. These are synthetic weather effects and are labelled as such:
 they are evidence about a renderer's fog, not about fog.
 
+## Where would you set the threshold?
+
+Average precision integrates over every confidence threshold at once. That is
+right for comparing two detectors and useless for shipping one, because a
+vehicle runs at a single threshold. Choosing it is the decision that turns an
+evaluation into an engineering argument.
+
+**Pedestrian recall tops out at 67.1% at ANY threshold.**
+
+| target recall | threshold | precision | false alarms / frame |
+|---|---|---|---|
+| 50% | 0.502 | 0.621 | 0.19 |
+| 70% | **unreachable** | | |
+| 90% | **unreachable** | | |
+
+That is not a tuning problem. Accepting *every* box the detector emits still
+leaves a third of annotated pedestrians unreported. A limit no operating point
+reaches is answered with a different sensor or a restricted operational domain,
+not a different number, and telling those two situations apart is the most
+consequential thing this evaluation does.
+
+**Car reaches 81.8%, and the last stretch is expensive:**
+
+| target recall | threshold | precision | false alarms / frame |
+|---|---|---|---|
+| 50% | 0.670 | 0.956 | 0.09 |
+| 70% | 0.436 | 0.850 | 0.46 |
+| 80% | 0.136 | 0.571 | **2.24** |
+| 90% | **unreachable** | | |
+
+A 1.6x gain in recall bought with a **25x** rise in phantom detections. At 2.24
+false alarms per frame, a vehicle running ten frames a second reacts to
+something imaginary twenty-two times a second.
+
+**Both directions are hazards**, which is why the hazard analysis now has four
+and not three: every one of the original set was about failing to react, and a
+taxonomy containing only those is quietly arguing for a threshold of zero.
+H-4 is unnecessary intervention, and phantom braking on a motorway is a
+collision risk rather than a comfort complaint.
+
+The rate is reported **per frame** rather than as precision because "one phantom
+detection every four frames" is a quantity an integrator can hold against a
+budget, and "precision 0.82" is not. No threshold is recommended: that depends
+on the vehicle, the speed and the function, none of which are in this
+repository.
+
 ## The SOTIF taxonomy, and the gate under it
 
-`safety/triggering_conditions.yaml` records six triggering conditions against
-three hazards. SOTIF's device is four areas, known-safe, known-unsafe,
+`safety/triggering_conditions.yaml` records eight triggering conditions against
+four hazards. SOTIF's device is four areas, known-safe, known-unsafe,
 unknown-safe and **unknown-unsafe**, and the whole job is shrinking the last.
 Each condition therefore states what it moved out of unknown-unsafe, not just
 that a number was low.
@@ -233,6 +279,8 @@ that a number was low.
 | TC-04 | Vehicles beyond 50 m | Car 0.900 → 0.172 |
 | TC-05 | Truncation costs pedestrians, not cars | Car flat at 0.72-0.75; Pedestrian 0.479 → 0.103 |
 | TC-06 | The class mapping cannot represent a cyclist | AP 0.006, a measurement artefact, not a detector limit |
+| TC-07 | Pedestrian recall has a ceiling no threshold reaches | 67.1% at any operating point |
+| TC-08 | Recall is bought with false alarms faster than linearly | Car 0.09 to 2.24 per frame for 50% to 80% |
 
 **A negative result is recorded in the same file**: horizontal position in the
 frame predicts nothing (Car 0.715 / 0.705 / 0.680 across thirds). A taxonomy

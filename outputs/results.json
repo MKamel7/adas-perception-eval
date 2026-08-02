@@ -40,6 +40,139 @@
       "Cyclist": 0.005679044669574725
     }
   },
+  "ceiling_recall": {
+    "Car": 0.8184262412618749,
+    "Pedestrian": 0.6707726763717805,
+    "Cyclist": 0.06158357771260997
+  },
+  "operating_points": {
+    "Car": [
+      {
+        "target": 0.5,
+        "threshold": 0.67015,
+        "precision": 0.9555629802873371,
+        "false_alarms_per_frame": 0.08866666666666667,
+        "missed": 2719,
+        "reachable": true
+      },
+      {
+        "target": 0.7,
+        "threshold": 0.43601,
+        "precision": 0.8501303214596003,
+        "false_alarms_per_frame": 0.46,
+        "missed": 1665,
+        "reachable": true
+      },
+      {
+        "target": 0.8,
+        "threshold": 0.13629,
+        "precision": 0.5707896754408383,
+        "false_alarms_per_frame": 2.239333333333333,
+        "missed": 1112,
+        "reachable": true
+      },
+      {
+        "target": 0.9,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      },
+      {
+        "target": 0.95,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      }
+    ],
+    "Pedestrian": [
+      {
+        "target": 0.5,
+        "threshold": 0.50192,
+        "precision": 0.6205962059620597,
+        "false_alarms_per_frame": 0.18666666666666668,
+        "missed": 435,
+        "reachable": true
+      },
+      {
+        "target": 0.7,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      },
+      {
+        "target": 0.8,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      },
+      {
+        "target": 0.9,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      },
+      {
+        "target": 0.95,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      }
+    ],
+    "Cyclist": [
+      {
+        "target": 0.5,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      },
+      {
+        "target": 0.7,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      },
+      {
+        "target": 0.8,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      },
+      {
+        "target": 0.9,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      },
+      {
+        "target": 0.95,
+        "threshold": null,
+        "precision": null,
+        "false_alarms_per_frame": null,
+        "missed": null,
+        "reachable": false
+      }
+    ]
+  },
   "slices": [
     {
       "dimension": "difficulty",

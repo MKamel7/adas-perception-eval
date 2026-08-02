@@ -11,6 +11,7 @@ Every condition traces up to a hazard and down to at least one test that recompu
 | H-1 | The vehicle fails to react to a vulnerable road user in its path because perception did not report one. | Collision with a pedestrian or cyclist at road speed. |
 | H-2 | The vehicle fails to react to a vehicle ahead because perception did not report it in time to act. | Rear-end collision, or a late and violent intervention. |
 | H-3 | Reported performance overstates real performance, so a limitation is never designed against because nobody knew it was there. | Not a collision on its own. It is the condition under which the other two go unmitigated, which is why it is listed as a hazard rather than as a process complaint. |
+| H-4 | The vehicle reacts to an object that is not there, because perception reported a detection with nothing behind it. | Unnecessary intervention. Phantom braking on a motorway is the sharp case, and it is a collision risk in its own right rather than a comfort complaint. Listed because every other hazard here is about failing to react, and a taxonomy containing only those would be arguing for a confidence threshold of zero. |
 
 ## Triggering conditions, and what demonstrates them
 
@@ -22,6 +23,8 @@ Every condition traces up to a hazard and down to at least one test that recompu
 | TC-04 | Vehicles beyond 50 metres | H-2 | distance | 4 | `test_cars_degrade_with_range_but_gracefully` |
 | TC-05 | Truncation hurts pedestrians and does not hurt cars | H-1 | truncation | 6 | `test_truncation_costs_pedestrians_and_not_cars` |
 | TC-06 | The class mapping cannot represent a cyclist | H-3 | overall | 1 | `test_the_cyclist_number_is_reported_and_disclaimed` |
+| TC-07 | Pedestrian recall has a ceiling no threshold reaches | H-1 | ceiling | 1 | `test_pedestrian_recall_has_a_ceiling_no_threshold_reaches` |
+| TC-08 | Buying recall costs false alarms faster than linearly | H-4 | false alarms per frame | 2 | `test_recall_is_bought_with_false_alarms_faster_than_linearly`<br>`test_a_tighter_threshold_is_quieter_and_finds_less` |
 
 ## Slices that showed nothing
 
@@ -31,7 +34,7 @@ Recorded because a taxonomy containing only the slices that worked is a fishing 
 
 ## Coverage
 
-- Hazards: **3**
-- Triggering conditions: **6**
-- Tests demonstrating a condition: **9**
-- Measured figures, every one checked against the evaluation: **29**
+- Hazards: **4**
+- Triggering conditions: **8**
+- Tests demonstrating a condition: **12**
+- Measured figures, every one checked against the evaluation: **32**
