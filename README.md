@@ -485,9 +485,34 @@ uv sync --group dev
 uv run pytest
 ```
 
+## Metamorphic robustness: the same scene, degraded a stated amount
+
+A second dataset changes the scene, the camera, the labelling policy and the class balance at once, so a drop in AP has four candidate causes. A perturbation changes exactly one thing by a stated amount and **leaves the ground truth identical**, so the curve is attributable. That is what makes these metamorphic relations rather than augmentations.
+
+500 KITTI frames, `yolov8s`, IoU 0.5, worst drop relative to the unperturbed baseline (`scripts/sweep_robustness.py`, full curves in `outputs/robustness.md`):
+
+| perturbation | at | Car | Pedestrian |
+|---|---|---|---|
+| blur | 4 px radius | -16.3% | **-17.4%** |
+| contrast removed | 0.8 | -13.0% | **-17.6%** |
+| JPEG | quality 10 | -8.4% | -11.7% |
+| fog veil | 0.6 opacity | -8.0% | -7.2% |
+| brightness | ±0.6 | **-0.2%** | -2.2% |
+
+**Three findings.**
+
+**Exposure is free and defocus is not.** Brightness at ±60% costs Car essentially nothing, which is a real result rather than a broken perturbation: the tests assert the image actually changed. A pipeline worrying about tunnel mouths and low sun is worrying about the wrong thing; one worrying about a dirty or misfocused lens is not.
+
+**Pedestrians degrade faster than cars under every perturbation except fog.** The class that matters most for a braking decision is the more fragile one, and the gap widens with strength: at blur radius 2 the Car cost is 3.3% and the Pedestrian cost is 8.5%. A single aggregate mAP hides that completely.
+
+**Nothing here falls off a cliff.** Every curve is gradual, so there is no threshold below which the detector stops working, and a degradation curve is the honest way to report that. A single number at one operating point would suggest a robustness the smooth decline does not contradict but also does not demonstrate.
+
+**Read with three caveats, all of them stated in the code.** This is 500 frames, so the baselines here (Car 0.758, Pedestrian 0.443) are not the headline figures above, which come from all 7481. The fog is a **uniform veil, not depth-aware**, so it understates exactly the distance dependence that matters most for ADAS; `vkitti` is where depth-aware weather belongs. And Cyclist is mapping-limited to the point of meaninglessness here, so its column is omitted.
+
+**Crop is deliberately not included.** It is a reasonable perturbation and it moves the boxes, so the ground truth would have to be transformed with it, which makes a bug in the box transform indistinguishable from a real drop. The whole point of this module is that nothing about the labels changes.
+
 ## Roadmap
 
-- **Metamorphic robustness on the KITTI data already fetched** — brightness, blur, contrast, compression, crop, synthetic fog, reported as a degradation curve. Most of the domain-shift story at near-zero cost.
 - **Confidence intervals on every slice cell**, not just the overall figures. The bootstrap already exists in `ape.uncertainty`. It is the difference between "night is worse" and "night is worse, and the sample supports saying so".
 - **Calibration and OOD scoring** — reliability diagrams and expected calibration error per slice, then an OOD score feeding triggering-condition detection. When this detector says 0.9, how often is it right? A confidently wrong detector is a different safety problem from an uncertainly wrong one, and SOTIF cares far more about the first.
 
