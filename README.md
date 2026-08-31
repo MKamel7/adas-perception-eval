@@ -288,6 +288,49 @@ confidently wrong one.
 comparable with the KITTI benchmark. This removes a limitation the README used
 to carry.
 
+## And what kind of mistake was the wrong box?
+
+The section above explains the misses. Until now nothing explained the false
+positives: every wrong box counted the same, so a detector that fires twice on
+one pedestrian and a detector that invents pedestrians in empty road produced
+the same number. AP cannot separate them either.
+
+Counted over the whole curve, so these are every box the detector emits at any
+confidence, not the ones a vehicle would act on:
+
+| class | false positives | duplicate | misclassified | mislocalised | **hallucinated** |
+|---|---|---|---|---|---|
+| Car | 33752 | 266 (1%) | 81 (0%) | 5305 (16%) | **28100 (83%)** |
+| Pedestrian | 10808 | 40 (0%) | 674 (6%) | 847 (8%) | **9247 (86%)** |
+
+**Four fifths of the wrong boxes are on nothing at all**, and that is the
+category a safety argument cares about most: it is the only one that makes a
+vehicle brake for empty road, and the only one whose cause is invisible in the
+ground truth. Duplicates are almost absent, so non-maximum suppression is not
+the problem. Misclassification is a rounding error for Car and 6% for
+Pedestrian, where the confusions are with the Cyclist and Car boxes a road
+scene puts people next to.
+
+The categories are defined in `src/ape/outcomes.py` and every one of them is
+read off the same match the metric used, at the same threshold, in the same
+order. Nothing here matches a second time.
+
+## Beyond AP: what no threshold choice can buy
+
+AP integrates over every operating point, which is a question no vehicle asks.
+These are the ones it does ask.
+
+| class | false-negative rate | recall at 90% precision | recall at 50% precision |
+|---|---|---|---|
+| Car | 18.2% | 64.7% | 80.9% |
+| Pedestrian | 31.3% | **0.2%** | 60.7% |
+
+**The pedestrian row is the finding.** An AP of 0.506 reads as a mediocre but
+usable detector. It is not usable at high precision at all: demand 90%
+precision and it returns two pedestrians in a thousand. There is no threshold
+that buys both, and the aggregate hides that completely, which is the argument
+for reporting more than one number per slice.
+
 ## Where would you set the threshold?
 
 Average precision integrates over every confidence threshold at once. That is
