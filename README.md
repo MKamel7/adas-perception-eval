@@ -485,6 +485,14 @@ uv sync --group dev
 uv run pytest
 ```
 
+## Roadmap
+
+- **Metamorphic robustness on the KITTI data already fetched** — brightness, blur, contrast, compression, crop, synthetic fog, reported as a degradation curve. Most of the domain-shift story at near-zero cost.
+- **Confidence intervals on every slice cell**, not just the overall figures. The bootstrap already exists in `ape.uncertainty`. It is the difference between "night is worse" and "night is worse, and the sample supports saying so".
+- **Calibration and OOD scoring** — reliability diagrams and expected calibration error per slice, then an OOD score feeding triggering-condition detection. When this detector says 0.9, how often is it right? A confidently wrong detector is a different safety problem from an uncertainly wrong one, and SOTIF cares far more about the first.
+
+Not doing: **nuScenes, BDD100K or Waymo before the metamorphic curves exist** (large, licence-gated, and they answer a question the harness has not yet shown it can express). Not training a better detector either, which would make the numbers nicer and the point weaker.
+
 ## Licence
 
 Code under MIT. KITTI is CC BY-NC-SA 3.0 and is not included.
