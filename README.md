@@ -513,7 +513,6 @@ A second dataset changes the scene, the camera, the labelling policy and the cla
 
 ## Roadmap
 
-- **Confidence intervals on every slice cell**, not just the overall figures. The bootstrap already exists in `ape.uncertainty`. It is the difference between "night is worse" and "night is worse, and the sample supports saying so".
 - **Calibration and OOD scoring** — reliability diagrams and expected calibration error per slice, then an OOD score feeding triggering-condition detection. When this detector says 0.9, how often is it right? A confidently wrong detector is a different safety problem from an uncertainly wrong one, and SOTIF cares far more about the first.
 
 Not doing: **nuScenes, BDD100K or Waymo before the metamorphic curves exist** (large, licence-gated, and they answer a question the harness has not yet shown it can express). Not training a better detector either, which would make the numbers nicer and the point weaker.

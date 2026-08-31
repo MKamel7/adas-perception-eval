@@ -75,6 +75,13 @@ class Evaluation:
     overall: dict[str, Curve] = field(default_factory=dict)
     overall_interval: dict[str, Interval] = field(default_factory=dict)
     by_difficulty: dict[str, dict[str, Curve]] = field(default_factory=dict)
+    #: The same 95% bootstrap interval the overall figures and the slice cells
+    #: carry. The difficulty tiers are a slice like any other, and reporting
+    #: them as bare numbers beside slices that show a range invited exactly the
+    #: comparison the intervals exist to prevent: Easy against Hard looks like a
+    #: finding until you see how much of the gap the sample explains.
+    by_difficulty_interval: dict[str, dict[str, Interval]] = field(
+        default_factory=dict)
     slices: list[SliceResult] = field(default_factory=list)
     #: class -> the operating-point curve. AP integrates over every threshold;
     #: a vehicle runs at one, and this is where that choice becomes visible.

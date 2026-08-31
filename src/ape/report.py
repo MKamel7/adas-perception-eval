@@ -129,8 +129,10 @@ def render(result: Evaluation, header: Header) -> str:
         for c in EVALUATED) + f"<td>{total_positives}</td></tr>")
     for tier, classes in result.by_difficulty.items():
         objects = sum(classes[c].positives for c in EVALUATED)
+        bands = result.by_difficulty_interval.get(tier, {})
         rows.append(f"<tr><td>{e(tier)}</td>" + "".join(
-            _cell(classes[c].average_precision, classes[c].positives, True)
+            _cell(classes[c].average_precision, classes[c].positives, True,
+                  bands.get(c))
             for c in EVALUATED) + f"<td>{objects}</td></tr>")
     rows.append("</tbody></table></div>")
 
