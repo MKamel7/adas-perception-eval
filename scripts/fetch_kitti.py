@@ -96,6 +96,20 @@ def download(archive: str, into: Path, expected: int) -> Path:
 def extract(archive: Path, into: Path, must_contain: str) -> None:
     print(f"  extracting {archive.name}")
     with zipfile.ZipFile(archive) as zf:
+        # Every member is checked to land inside `into` before anything is
+        # written. ZipFile has no equivalent of tarfile's filter="data", which
+        # is what fetch_vkitti.py uses, so the check is written out here. An
+        # entry named "../../etc/thing" or an absolute path would otherwise
+        # extract outside the data directory; these archives come from a fixed
+        # official URL, so this is a guard against the URL or the host
+        # changing, not against KITTI.
+        root = into.resolve()
+        for member in zf.infolist():
+            destination = (root / member.filename).resolve()
+            if destination != root and root not in destination.parents:
+                raise SystemExit(
+                    f"{archive.name} contains {member.filename!r}, which would "
+                    f"extract outside {into}. Refusing to unpack it.")
         zf.extractall(into)
     if not (into / must_contain).is_dir():
         raise SystemExit(

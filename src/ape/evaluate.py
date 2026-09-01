@@ -20,6 +20,7 @@ from ape.localisation import THRESHOLDS, Diagnosis, diagnose
 from ape.match import Assignment, assign, assign_by_frame, at_difficulty, in_slice
 from ape.metrics import Curve, average_precision, mean_average_precision
 from ape.operating import Point, best_recall, sweep, threshold_for_recall
+from ape.outcomes import Breakdown, classify
 from ape.records import Detection, Difficulty, GroundTruth
 from ape.slices import DIMENSIONS
 from ape.uncertainty import Interval, bootstrap
@@ -74,6 +75,13 @@ class Evaluation:
     overall: dict[str, Curve] = field(default_factory=dict)
     overall_interval: dict[str, Interval] = field(default_factory=dict)
     by_difficulty: dict[str, dict[str, Curve]] = field(default_factory=dict)
+    #: The same 95% bootstrap interval the overall figures and the slice cells
+    #: carry. The difficulty tiers are a slice like any other, and reporting
+    #: them as bare numbers beside slices that show a range invited exactly the
+    #: comparison the intervals exist to prevent: Easy against Hard looks like a
+    #: finding until you see how much of the gap the sample explains.
+    by_difficulty_interval: dict[str, dict[str, Interval]] = field(
+        default_factory=dict)
     slices: list[SliceResult] = field(default_factory=list)
     #: class -> the operating-point curve. AP integrates over every threshold;
     #: a vehicle runs at one, and this is where that choice becomes visible.
@@ -88,6 +96,11 @@ class Evaluation:
     #: class -> why the objects missed at IoU 0.5 were missed. Not seen at all,
     #: or seen and boxed badly: different fixes, different severities.
     diagnosis: dict[str, Diagnosis] = field(default_factory=dict)
+    #: class -> what KIND of mistake each false positive was. The other half of
+    #: the same question: `diagnosis` explains the misses, this explains the
+    #: wrong boxes. An AP made of duplicates and an AP made of hallucinations
+    #: describe different systems and one number cannot tell them apart.
+    outcomes: dict[str, Breakdown] = field(default_factory=dict)
 
     @property
     def headline(self) -> float:
@@ -146,6 +159,8 @@ def evaluate(detections: dict[str, list[Detection]],
             ).average_precision
         result.diagnosis[label] = diagnose(detections, truth, label, neutral,
                                            tight=iou)
+        result.outcomes[label] = classify(detections, truth, label, neutral,
+                                          iou, EVALUATED)
 
         whole = assign(detections, truth, label, neutral, iou)
         result.curve_points[label] = sweep(whole, len(truth))

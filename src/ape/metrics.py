@@ -100,6 +100,42 @@ def average_precision(assignment: Assignment) -> Curve:
                  assignment.positives, hits, misses)
 
 
+def false_negative_rate(curve: Curve) -> float:
+    """The share of objects no threshold choice would have found.
+
+    The complement of the recall ceiling, and closer to what a safety argument
+    actually asks. AP integrates over every operating point and so answers a
+    question no vehicle ever asks; this answers "what fraction of the
+    pedestrians in this slice does the perception stack simply not deliver".
+    """
+    if not curve.positives:
+        return float("nan")
+    return 1.0 - curve.best_recall
+
+
+def recall_at_precision(curve: Curve, target: float) -> float:
+    """The most recall available while precision stays at or above `target`.
+
+    Read off the precision envelope rather than the raw curve, for the same
+    reason AP is: without it the answer depends on a single detection instead
+    of on the best precision achievable at that recall or beyond.
+
+    Returns 0.0 when the target is never met. That is a real answer, not a
+    missing one: it says this detector cannot be operated that precisely at
+    any threshold.
+    """
+    if not curve.recall:
+        return float("nan")
+
+    envelope = list(curve.precision)
+    for i in range(len(envelope) - 2, -1, -1):
+        envelope[i] = max(envelope[i], envelope[i + 1])
+
+    return max((recall for recall, precision
+                in zip(curve.recall, envelope, strict=True)
+                if precision >= target), default=0.0)
+
+
 def mean_average_precision(curves: dict[str, Curve]) -> float:
     """Mean AP over classes, skipping classes that were never present.
 

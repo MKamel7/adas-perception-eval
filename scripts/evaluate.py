@@ -22,6 +22,8 @@ from ape.cache import load_detections  # noqa: E402
 from ape.classes import EVALUATED, HEADLINE  # noqa: E402
 from ape.evaluate import IOU, evaluate, operating_table  # noqa: E402
 from ape.kitti import frame_ids, load_labels  # noqa: E402
+from ape.metrics import false_negative_rate, recall_at_precision  # noqa: E402
+from ape.outcomes import FAILURES  # noqa: E402
 from ape.report import render  # noqa: E402
 
 
@@ -102,6 +104,24 @@ def main() -> int:
               f"{diagnosis.mislocated} mislocated, {diagnosis.unseen} unseen "
               f"-> {diagnosis.mislocation_share:.0%} of misses are a box problem")
 
+    print("\nwhat kind of mistake was it? (AP counts every wrong box the same)")
+    for label in HEADLINE:
+        breakdown = result.outcomes[label]
+        parts = "  ".join(f"{outcome.value} {breakdown.counts[outcome]}"
+                          f" ({breakdown.share(outcome):.0%})"
+                          for outcome in FAILURES)
+        print(f"  {label:<11} {breakdown.false_positives} false positives")
+        print(f"              {parts}")
+
+    print("\nbeyond AP: what no threshold choice can buy")
+    for label in HEADLINE:
+        curve = result.overall[label]
+        print(f"  {label:<11} false-negative rate "
+              f"{false_negative_rate(curve):.1%} at the recall ceiling")
+        print(f"              recall at 90% precision "
+              f"{recall_at_precision(curve, 0.90):.1%}, "
+              f"at 50% precision {recall_at_precision(curve, 0.50):.1%}")
+
     print("\nchoosing an operating point (AP integrates over all of them; "
           "a vehicle runs at one)")
     for label in HEADLINE:
@@ -131,6 +151,17 @@ def main() -> int:
                           "mislocated": d.mislocated, "unseen": d.unseen,
                           "mislocation_share": d.mislocation_share}
                       for k, d in result.diagnosis.items()},
+        "false_positive_kinds": {
+            k: {"total": b.false_positives,
+                "counts": {o.value: b.counts[o] for o in FAILURES},
+                "shares": {o.value: b.share(o) for o in FAILURES}}
+            for k, b in result.outcomes.items()},
+        "beyond_ap": {
+            k: {"false_negative_rate": false_negative_rate(c),
+                "max_recall": c.best_recall,
+                "recall_at_precision_90": recall_at_precision(c, 0.90),
+                "recall_at_precision_50": recall_at_precision(c, 0.50)}
+            for k, c in result.overall.items()},
         "operating_points": {
             label: [{"target": target,
                      "threshold": p.threshold if p else None,

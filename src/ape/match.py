@@ -111,40 +111,120 @@ def partition(ground_truth: list[GroundTruth], label: str,
     return counts, tolerated
 
 
-def assign_frame(detections: list[Detection], ground_truth: list[GroundTruth],
-                 label: str, neutral: frozenset[str], iou_threshold: float,
-                 counts_when: Predicate | None = None) -> Assignment:
-    """One frame, one class."""
+@dataclass(frozen=True)
+class Judged:
+    """One detection, and everything the matcher learned while judging it.
+
+    `best_free` is the overlap that decided the verdict. `best_any` includes
+    ground truth already claimed by a higher-scoring detection: when the second
+    clears the threshold and the first does not, this box found a real object
+    somebody else was already credited with, which is a duplicate rather than a
+    hallucination. Carrying both is what lets `ape.outcomes` separate those
+    without running the match a second time.
+    """
+
+    detection: Detection
+    #: True positive, ignored, or a false positive awaiting a finer verdict.
+    true_positive: bool
+    ignored: bool
+    #: Index into `FrameOutcome.counts`, or -1.
+    matched_index: int
+    best_free: float
+    best_any: float
+
+
+@dataclass(frozen=True)
+class FrameOutcome:
+    """The full result of matching one frame, one class.
+
+    `Assignment` is this with the per-object detail discarded, and both come
+    from a single pass. The demo scene used to run its own copy of the loop
+    below, and a copy of a matcher is a copy that drifts: the picture and the
+    reported metric could disagree about the same frame with nothing to catch
+    it.
+    """
+
+    counts: list[GroundTruth]
+    tolerated: list[GroundTruth]
+    judged: list[Judged]
+    claimed: frozenset[int]
+
+    @property
+    def found(self) -> list[GroundTruth]:
+        return [g for i, g in enumerate(self.counts) if i in self.claimed]
+
+    @property
+    def missed(self) -> list[GroundTruth]:
+        return [g for i, g in enumerate(self.counts) if i not in self.claimed]
+
+    def best_overlap_on(self, item: GroundTruth) -> float:
+        """The best overlap ANY detection of this class achieved on one object.
+
+        What separates "never saw it" from "saw it and boxed it badly", which
+        are different failures with different fixes.
+        """
+        return max((j.detection.box.iou(item.box) for j in self.judged),
+                   default=0.0)
+
+    def as_assignment(self) -> Assignment:
+        result = Assignment(positives=len(self.counts))
+        for judged in self.judged:
+            if judged.ignored:
+                result.ignored += 1
+            else:
+                result.scored.append((judged.detection.score, judged.true_positive))
+        return result
+
+
+def judge_frame(detections: list[Detection], ground_truth: list[GroundTruth],
+                label: str, neutral: frozenset[str], iou_threshold: float,
+                counts_when: Predicate | None = None) -> FrameOutcome:
+    """One frame, one class, keeping the per-object detail.
+
+    THE ORDER HERE IS THE DEFINITION, see the module docstring. Anything that
+    needs to know what happened to a particular box calls this instead of
+    writing the loop again.
+    """
     counts, tolerated = partition(ground_truth, label, neutral, counts_when)
-    result = Assignment(positives=len(counts))
 
     claimed: set[int] = set()
+    judged: list[Judged] = []
     for detection in sorted(detections, key=lambda d: d.score, reverse=True):
         if detection.label != label:
             continue
 
-        best_iou, best_index = 0.0, -1
+        best_iou, best_index, best_any = 0.0, -1, 0.0
         for index, candidate in enumerate(counts):
+            overlap = detection.box.iou(candidate.box)
+            best_any = max(best_any, overlap)
             if index in claimed:
                 continue
-            overlap = detection.box.iou(candidate.box)
             if overlap > best_iou:
                 best_iou, best_index = overlap, index
 
         if best_index >= 0 and best_iou >= iou_threshold:
             claimed.add(best_index)
-            result.scored.append((detection.score, True))
+            judged.append(Judged(detection, True, False, best_index,
+                                 best_iou, best_any))
             continue
 
         # Nothing scoreable. Before calling it a mistake, check whether it
         # landed on something the benchmark refuses to score.
         if any(detection.box.iou(item.box) >= iou_threshold for item in tolerated):
-            result.ignored += 1
+            judged.append(Judged(detection, False, True, -1, best_iou, best_any))
             continue
 
-        result.scored.append((detection.score, False))
+        judged.append(Judged(detection, False, False, -1, best_iou, best_any))
 
-    return result
+    return FrameOutcome(counts, tolerated, judged, frozenset(claimed))
+
+
+def assign_frame(detections: list[Detection], ground_truth: list[GroundTruth],
+                 label: str, neutral: frozenset[str], iou_threshold: float,
+                 counts_when: Predicate | None = None) -> Assignment:
+    """One frame, one class. A view of `judge_frame` without the detail."""
+    return judge_frame(detections, ground_truth, label, neutral,
+                       iou_threshold, counts_when).as_assignment()
 
 
 def assign_by_frame(detections: dict[str, list[Detection]],

@@ -53,7 +53,7 @@ from ape.cache import load_detections  # noqa: E402
 from ape.classes import neutral_labels  # noqa: E402
 from ape.evaluate import IOU  # noqa: E402
 from ape.kitti import frame_ids, load_labels  # noqa: E402
-from ape.match import partition  # noqa: E402
+from ape.match import judge_frame  # noqa: E402
 from ape.slices import dimension  # noqa: E402
 
 GREEN, RED, BLUE, GREY, INK, PAPER = ((60, 200, 120), (235, 60, 80),
@@ -86,27 +86,19 @@ def match(truth, detections, label):
     detector did not see this" and "the detector saw it and boxed it badly",
     which are different failures with different fixes and looked identical in
     the first version of this scene.
-    """
-    counts, _ = partition(truth, label, neutral_labels(label), None)
-    claimed: set[int] = set()
-    for detection in sorted(detections, key=lambda d: d.score, reverse=True):
-        if detection.label != label:
-            continue
-        best, index = 0.0, -1
-        for i, candidate in enumerate(counts):
-            if i in claimed:
-                continue
-            overlap = detection.box.iou(candidate.box)
-            if overlap > best:
-                best, index = overlap, i
-        if index >= 0 and best >= IOU:
-            claimed.add(index)
 
-    found = [g for i, g in enumerate(counts) if i in claimed]
-    gone = [(g, max((d.box.iou(g.box) for d in detections
-                     if d.label == label), default=0.0))
-            for i, g in enumerate(counts) if i not in claimed]
-    return found, gone
+    THIS USED TO BE ITS OWN COPY OF THE MATCHER. It reimplemented the greedy
+    descending-score loop from `ape.match`, closely but not identically: it had
+    no notion of neutral ground truth, so a box on a Person_sitting counted as
+    claiming nothing here while the metric declined to score it at all. The
+    picture and the reported number could therefore disagree about the same
+    frame, with nothing in the repository able to notice. It now asks the same
+    function the metric does, and `tests/test_outcomes.py` asserts that
+    function and `assign_frame` cannot diverge.
+    """
+    outcome = judge_frame(detections, truth, label, neutral_labels(label), IOU)
+    return outcome.found, [(item, outcome.best_overlap_on(item))
+                           for item in outcome.missed]
 
 
 def main() -> int:

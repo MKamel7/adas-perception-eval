@@ -167,12 +167,23 @@ class Detector:
 
     def detect(self, image_path: Path, frame_id: str) -> list[Detection]:
         """Every scored detection in one frame, in original image pixels."""
-        import numpy as np
         from PIL import Image
 
         with Image.open(image_path) as handle:
-            image = handle.convert("RGB")
-            tensor, box = self._preprocess(image)
+            return self.detect_image(handle.convert("RGB"), frame_id)
+
+    def detect_image(self, image: Any, frame_id: str) -> list[Detection]:
+        """The same, on an image already in memory.
+
+        Exists so `ape.perturb` can degrade a frame and score the result without
+        writing it to disk first. `detect` is a thin wrapper over this, so the
+        two cannot drift: a robustness sweep that ran a different pipeline from
+        the baseline would be measuring the pipeline rather than the
+        perturbation.
+        """
+        import numpy as np
+
+        tensor, box = self._preprocess(image)
 
         raw = self.session.run(None, {self.input_name: tensor})[0]
         # YOLOv8 emits (1, 4 + classes, anchors): box first, then class scores,

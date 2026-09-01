@@ -288,6 +288,49 @@ confidently wrong one.
 comparable with the KITTI benchmark. This removes a limitation the README used
 to carry.
 
+## And what kind of mistake was the wrong box?
+
+The section above explains the misses. Until now nothing explained the false
+positives: every wrong box counted the same, so a detector that fires twice on
+one pedestrian and a detector that invents pedestrians in empty road produced
+the same number. AP cannot separate them either.
+
+Counted over the whole curve, so these are every box the detector emits at any
+confidence, not the ones a vehicle would act on:
+
+| class | false positives | duplicate | misclassified | mislocalised | **hallucinated** |
+|---|---|---|---|---|---|
+| Car | 33752 | 266 (1%) | 81 (0%) | 5305 (16%) | **28100 (83%)** |
+| Pedestrian | 10808 | 40 (0%) | 674 (6%) | 847 (8%) | **9247 (86%)** |
+
+**Four fifths of the wrong boxes are on nothing at all**, and that is the
+category a safety argument cares about most: it is the only one that makes a
+vehicle brake for empty road, and the only one whose cause is invisible in the
+ground truth. Duplicates are almost absent, so non-maximum suppression is not
+the problem. Misclassification is a rounding error for Car and 6% for
+Pedestrian, where the confusions are with the Cyclist and Car boxes a road
+scene puts people next to.
+
+The categories are defined in `src/ape/outcomes.py` and every one of them is
+read off the same match the metric used, at the same threshold, in the same
+order. Nothing here matches a second time.
+
+## Beyond AP: what no threshold choice can buy
+
+AP integrates over every operating point, which is a question no vehicle asks.
+These are the ones it does ask.
+
+| class | false-negative rate | recall at 90% precision | recall at 50% precision |
+|---|---|---|---|
+| Car | 18.2% | 64.7% | 80.9% |
+| Pedestrian | 31.3% | **0.2%** | 60.7% |
+
+**The pedestrian row is the finding.** An AP of 0.506 reads as a mediocre but
+usable detector. It is not usable at high precision at all: demand 90%
+precision and it returns two pedestrians in a thousand. There is no threshold
+that buys both, and the aggregate hides that completely, which is the argument
+for reporting more than one number per slice.
+
 ## Where would you set the threshold?
 
 Average precision integrates over every confidence threshold at once. That is
@@ -441,6 +484,98 @@ fixture under `tests/fixtures/` is what the test suite runs against.
 uv sync --group dev
 uv run pytest
 ```
+
+## Metamorphic robustness: the same scene, degraded a stated amount
+
+A second dataset changes the scene, the camera, the labelling policy and the class balance at once, so a drop in AP has four candidate causes. A perturbation changes exactly one thing by a stated amount and **leaves the ground truth identical**, so the curve is attributable. That is what makes these metamorphic relations rather than augmentations.
+
+500 KITTI frames, `yolov8s`, IoU 0.5, worst drop relative to the unperturbed baseline (`scripts/sweep_robustness.py`, full curves in `outputs/robustness.md`):
+
+| perturbation | at | Car | Pedestrian |
+|---|---|---|---|
+| blur | 4 px radius | -16.3% | **-17.4%** |
+| contrast removed | 0.8 | -13.0% | **-17.6%** |
+| JPEG | quality 10 | -8.4% | -11.7% |
+| fog veil | 0.6 opacity | -8.0% | -7.2% |
+| brightness | ±0.6 | **-0.2%** | -2.2% |
+
+**Three findings.**
+
+**Exposure is free and defocus is not.** Brightness at ±60% costs Car essentially nothing, which is a real result rather than a broken perturbation: the tests assert the image actually changed. A pipeline worrying about tunnel mouths and low sun is worrying about the wrong thing; one worrying about a dirty or misfocused lens is not.
+
+**Pedestrians degrade faster than cars under every perturbation except fog.** The class that matters most for a braking decision is the more fragile one, and the gap widens with strength: at blur radius 2 the Car cost is 3.3% and the Pedestrian cost is 8.5%. A single aggregate mAP hides that completely.
+
+**Nothing here falls off a cliff.** Every curve is gradual, so there is no threshold below which the detector stops working, and a degradation curve is the honest way to report that. A single number at one operating point would suggest a robustness the smooth decline does not contradict but also does not demonstrate.
+
+**Read with three caveats, all of them stated in the code.** This is 500 frames, so the baselines here (Car 0.758, Pedestrian 0.443) are not the headline figures above, which come from all 7481. The fog is a **uniform veil, not depth-aware**, so it understates exactly the distance dependence that matters most for ADAS; `vkitti` is where depth-aware weather belongs. And Cyclist is mapping-limited to the point of meaninglessness here, so its column is omitted.
+
+**Crop is deliberately not included.** It is a reasonable perturbation and it moves the boxes, so the ground truth would have to be transformed with it, which makes a bug in the box transform indistinguishable from a real drop. The whole point of this module is that nothing about the labels changes.
+
+## Calibration, and why the sign matters more than the size
+
+mAP asks how often the detector is right. **Calibration asks whether it knows how
+often it is right**, and nothing else here measured that. A detector at 0.68 mAP
+that reports 0.95 on every box it will get wrong is a worse engineering problem
+than one reporting 0.4 on those boxes, because the second can be gated by a
+threshold and the first cannot.
+
+`src/ape/calibration.py` bins detections by confidence and reports what each band
+actually delivered: a reliability diagram as data, plus expected calibration
+error, maximum calibration error, and **overconfidence error**.
+
+That last one is the point. **ECE is symmetric.** A detector claiming 0.4 while
+being right 0.9 of the time scores exactly as badly as one claiming 0.9 while
+being right 0.4 of the time, and those are not equally dangerous. The first is
+timid and merely wastes performance; the second is **confidently wrong**, which
+is the failure ISO 21448 exists for. A test constructs that exact pair and
+asserts ECE cannot tell them apart while overconfidence error can.
+
+**Slices are cut on the detection, not the ground truth**, which is the decision
+here worth arguing with. Every other slice in this repository cuts on
+ground-truth attributes: range, occlusion, truncation. Those exist only for
+objects that are really there, so slicing calibration that way would silently
+drop every false positive, and false positives are exactly where overconfidence
+does its damage. Box height stands in for range. It is a weaker proxy than
+KITTI's labelled distance and it is the only one a box corresponding to nothing
+can have.
+
+## Is this frame the kind of thing we validated on?
+
+Every other measurement here asks how well the detector did on some data.
+`src/ape/ood.py` asks the prior question: **is this data the data we validated
+against.** A frame that is not is a triggering condition whether or not the
+detector happened to get it right, which is the ISO 21448 case where nothing has
+failed and the world is simply outside the design envelope.
+
+It fits an operating envelope over six cheap image statistics and scores new
+frames by Mahalanobis distance. **Mahalanobis rather than a z-score per feature
+because the features covary**: a foggy frame is brighter *and* lower contrast
+*and* has fewer edges together, and scoring each independently treats one
+moderate joint excursion as three unremarkable ones. A test puts two probes the
+same distance out on every individual feature, one along the correlation and one
+across it, and asserts the second scores an order of magnitude higher.
+
+**What it is not:** a learned OOD method. There is no network and nothing is
+trained, consistent with the rest of this repository. It will notice fog, night,
+blur, a blown exposure and compression artefacts. **It will not notice a
+semantically novel object rendered at ordinary brightness and contrast**, and
+that limit is the interesting half of the honesty, because it is exactly the
+failure a statistics-only detector cannot see.
+
+**An OOD score nobody has validated is a number, not evidence.** `agreement()`
+measures whether high-scoring frames actually did worse, reporting an AUC that
+sits at 0.5 for a score carrying no information. A score that cannot rank the
+degraded frames first has not earned the right to gate anything. The output is
+called `triggering_candidates` rather than triggering conditions on purpose: a
+triggering condition is a scenario a person describes and reasons about, and
+promoting a statistic straight into a safety artefact is the shortcut that name
+refuses to take.
+
+## Roadmap
+
+- ~~**Calibration and OOD scoring**~~ **Done, 1 September.** `src/ape/calibration.py` and `src/ape/ood.py`. See the section above.
+
+Not doing: **nuScenes, BDD100K or Waymo before the metamorphic curves exist** (large, licence-gated, and they answer a question the harness has not yet shown it can express). Not training a better detector either, which would make the numbers nicer and the point weaker.
 
 ## Licence
 

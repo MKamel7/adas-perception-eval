@@ -85,6 +85,73 @@
       "mislocation_share": 0.1904127829560586
     }
   },
+  "false_positive_kinds": {
+    "Car": {
+      "total": 33752,
+      "counts": {
+        "duplicate": 266,
+        "misclassified": 81,
+        "mislocalised": 5305,
+        "hallucinated": 28100
+      },
+      "shares": {
+        "duplicate": 0.007881014458402466,
+        "misclassified": 0.002399857786205262,
+        "mislocalised": 0.15717587105949277,
+        "hallucinated": 0.8325432566958995
+      }
+    },
+    "Pedestrian": {
+      "total": 10808,
+      "counts": {
+        "duplicate": 40,
+        "misclassified": 674,
+        "mislocalised": 847,
+        "hallucinated": 9247
+      },
+      "shares": {
+        "duplicate": 0.003700962250185048,
+        "misclassified": 0.06236121391561806,
+        "mislocalised": 0.0783678756476684,
+        "hallucinated": 0.8555699481865285
+      }
+    },
+    "Cyclist": {
+      "total": 8100,
+      "counts": {
+        "duplicate": 2,
+        "misclassified": 50,
+        "mislocalised": 525,
+        "hallucinated": 7523
+      },
+      "shares": {
+        "duplicate": 0.0002469135802469136,
+        "misclassified": 0.006172839506172839,
+        "mislocalised": 0.06481481481481481,
+        "hallucinated": 0.9287654320987654
+      }
+    }
+  },
+  "beyond_ap": {
+    "Car": {
+      "false_negative_rate": 0.18199846913923878,
+      "max_recall": 0.8180015308607612,
+      "recall_at_precision_90": 0.6471713868206805,
+      "recall_at_precision_50": 0.8085380279730012
+    },
+    "Pedestrian": {
+      "false_negative_rate": 0.31268107867171835,
+      "max_recall": 0.6873189213282817,
+      "recall_at_precision_90": 0.0020057945174949856,
+      "recall_at_precision_50": 0.6068642745709828
+    },
+    "Cyclist": {
+      "false_negative_rate": 0.9231714812538414,
+      "max_recall": 0.07682851874615858,
+      "recall_at_precision_90": 0.0,
+      "recall_at_precision_50": 0.0
+    }
+  },
   "operating_points": {
     "Car": [
       {
