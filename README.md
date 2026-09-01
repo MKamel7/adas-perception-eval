@@ -511,9 +511,69 @@ A second dataset changes the scene, the camera, the labelling policy and the cla
 
 **Crop is deliberately not included.** It is a reasonable perturbation and it moves the boxes, so the ground truth would have to be transformed with it, which makes a bug in the box transform indistinguishable from a real drop. The whole point of this module is that nothing about the labels changes.
 
+## Calibration, and why the sign matters more than the size
+
+mAP asks how often the detector is right. **Calibration asks whether it knows how
+often it is right**, and nothing else here measured that. A detector at 0.68 mAP
+that reports 0.95 on every box it will get wrong is a worse engineering problem
+than one reporting 0.4 on those boxes, because the second can be gated by a
+threshold and the first cannot.
+
+`src/ape/calibration.py` bins detections by confidence and reports what each band
+actually delivered: a reliability diagram as data, plus expected calibration
+error, maximum calibration error, and **overconfidence error**.
+
+That last one is the point. **ECE is symmetric.** A detector claiming 0.4 while
+being right 0.9 of the time scores exactly as badly as one claiming 0.9 while
+being right 0.4 of the time, and those are not equally dangerous. The first is
+timid and merely wastes performance; the second is **confidently wrong**, which
+is the failure ISO 21448 exists for. A test constructs that exact pair and
+asserts ECE cannot tell them apart while overconfidence error can.
+
+**Slices are cut on the detection, not the ground truth**, which is the decision
+here worth arguing with. Every other slice in this repository cuts on
+ground-truth attributes: range, occlusion, truncation. Those exist only for
+objects that are really there, so slicing calibration that way would silently
+drop every false positive, and false positives are exactly where overconfidence
+does its damage. Box height stands in for range. It is a weaker proxy than
+KITTI's labelled distance and it is the only one a box corresponding to nothing
+can have.
+
+## Is this frame the kind of thing we validated on?
+
+Every other measurement here asks how well the detector did on some data.
+`src/ape/ood.py` asks the prior question: **is this data the data we validated
+against.** A frame that is not is a triggering condition whether or not the
+detector happened to get it right, which is the ISO 21448 case where nothing has
+failed and the world is simply outside the design envelope.
+
+It fits an operating envelope over six cheap image statistics and scores new
+frames by Mahalanobis distance. **Mahalanobis rather than a z-score per feature
+because the features covary**: a foggy frame is brighter *and* lower contrast
+*and* has fewer edges together, and scoring each independently treats one
+moderate joint excursion as three unremarkable ones. A test puts two probes the
+same distance out on every individual feature, one along the correlation and one
+across it, and asserts the second scores an order of magnitude higher.
+
+**What it is not:** a learned OOD method. There is no network and nothing is
+trained, consistent with the rest of this repository. It will notice fog, night,
+blur, a blown exposure and compression artefacts. **It will not notice a
+semantically novel object rendered at ordinary brightness and contrast**, and
+that limit is the interesting half of the honesty, because it is exactly the
+failure a statistics-only detector cannot see.
+
+**An OOD score nobody has validated is a number, not evidence.** `agreement()`
+measures whether high-scoring frames actually did worse, reporting an AUC that
+sits at 0.5 for a score carrying no information. A score that cannot rank the
+degraded frames first has not earned the right to gate anything. The output is
+called `triggering_candidates` rather than triggering conditions on purpose: a
+triggering condition is a scenario a person describes and reasons about, and
+promoting a statistic straight into a safety artefact is the shortcut that name
+refuses to take.
+
 ## Roadmap
 
-- **Calibration and OOD scoring** — reliability diagrams and expected calibration error per slice, then an OOD score feeding triggering-condition detection. When this detector says 0.9, how often is it right? A confidently wrong detector is a different safety problem from an uncertainly wrong one, and SOTIF cares far more about the first.
+- ~~**Calibration and OOD scoring**~~ **Done, 1 September.** `src/ape/calibration.py` and `src/ape/ood.py`. See the section above.
 
 Not doing: **nuScenes, BDD100K or Waymo before the metamorphic curves exist** (large, licence-gated, and they answer a question the harness has not yet shown it can express). Not training a better detector either, which would make the numbers nicer and the point weaker.
 
