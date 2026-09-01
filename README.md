@@ -571,11 +571,9 @@ triggering condition is a scenario a person describes and reasons about, and
 promoting a statistic straight into a safety artefact is the shortcut that name
 refuses to take.
 
-## Roadmap
+## Deliberately not doing
 
-- ~~**Calibration and OOD scoring**~~ **Done, 1 September.** `src/ape/calibration.py` and `src/ape/ood.py`. See the section above.
-
-Not doing: **nuScenes, BDD100K or Waymo before the metamorphic curves exist** (large, licence-gated, and they answer a question the harness has not yet shown it can express). Not training a better detector either, which would make the numbers nicer and the point weaker.
+ **nuScenes, BDD100K or Waymo before the metamorphic curves exist** (large, licence-gated, and they answer a question the harness has not yet shown it can express). Not training a better detector either, which would make the numbers nicer and the point weaker.
 
 ## Licence
 
