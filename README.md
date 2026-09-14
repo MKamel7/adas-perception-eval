@@ -277,4 +277,10 @@ uv run pytest
 
 ## Licence
 
-Code under MIT. KITTI is CC BY-NC-SA 3.0 and is not included.
+Code under MIT, see [LICENSE](LICENSE).
+
+The KITTI dataset is not included in this repository and is licensed separately
+under CC BY-NC-SA 3.0 by Karlsruhe Institute of Technology and Toyota
+Technological Institute at Chicago. The 20-frame fixture under `tests/fixtures/`
+consists of annotation text files from that dataset, retained under the same
+non-commercial terms for the purpose of testing this software.
