@@ -271,26 +271,6 @@ entry point.
   or wrong. A detector that is confidently wrong is more dangerous in a vehicle than
   one that is uncertain and says so, and mAP alone cannot see that difference.
 
-## ⚠️ Honest limits
-
-- Pretrained COCO weights evaluated on KITTI classes. A KITTI-trained model would
-  score higher. The score is not the deliverable.
-- 2D only. Real ADAS validation is 3D and multi-sensor.
-- KITTI is daytime, fair weather, one city, one sensor rig. The weather and
-  lighting evidence comes from synthetic data, which is a weaker claim and is
-  labelled as such wherever it appears.
-- No ODD definition, no exposure or controllability analysis, no residual risk
-  argument. **SOTIF's vocabulary is borrowed on purpose; its process is not
-  performed, and no compliance is claimed.**
-- CARLA was excluded on hardware grounds, not preference: it wants an NVIDIA GPU
-  with at least 6 GB of VRAM against 1 GB of shared integrated graphics here.
-- CarMaker, dSPACE and aiSim are what industry actually runs, and all are
-  commercially licensed. Scenario simulation and recorded-data evaluation are two
-  halves of one job; this project does the half that needs no licence.
-- CI runs the metric implementations against small committed fixtures. It does not
-  run the full evaluation, because KITTI is gigabytes and a CI job claiming
-  otherwise would be lying.
-
 ## 📥 Getting the data
 
 KITTI is not redistributed here. `data/` is gitignored; the committed 20-frame
@@ -300,10 +280,6 @@ fixture under `tests/fixtures/` is what the test suite runs against.
 uv sync --group dev
 uv run pytest
 ```
-
-## 🚫 Deliberately not doing
-
- **nuScenes, BDD100K or Waymo before the metamorphic curves exist** (large, licence-gated, and they answer a question the harness has not yet shown it can express). Not training a better detector either, which would make the numbers nicer and the point weaker.
 
 ## 📄 Licence
 
