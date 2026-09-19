@@ -31,6 +31,16 @@ written before any code, so a result cannot be rationalised into a pass
 afterwards, and that cuts both ways: M2's budget is missed and is recorded as
 missed rather than adjusted.
 
+## 🛠️ Built with
+
+| | |
+| --- | --- |
+| **Language** | Python |
+| **Inference** | ONNX Runtime |
+| **Metrics** | Slice-based mAP, validated against pycocotools |
+| **Data** | KITTI 2D object detection |
+| **Engineering** | Expected results recorded before running, GitHub Actions CI |
+
 ## 📊 The result
 
 **The full KITTI training split: 7481 frames, 40,570 annotated objects.** YOLOv8s exported to ONNX, IoU 0.5.
@@ -271,6 +281,17 @@ entry point.
   or wrong. A detector that is confidently wrong is more dangerous in a vehicle than
   one that is uncertain and says so, and mAP alone cannot see that difference.
 
+## 🔭 Future improvements
+
+- **Extend the slices beyond distance and occlusion.** Truncation, lighting and object
+  size each hide their own failures, and the harness is already shaped to take them.
+- **Evaluate a second detector on the same slices.** One model tells you about that
+  model; two tell you whether the slicing itself is finding something real.
+- **Bring calibration into the headline, not a side section.** A reliability diagram
+  belongs next to mAP, because a confidently wrong detection is the dangerous one.
+- **Validate on a second dataset.** Everything here is KITTI, which is one camera, one
+  city and one set of conditions.
+
 ## 📥 Getting the data
 
 KITTI is not redistributed here. `data/` is gitignored; the committed 20-frame
@@ -290,3 +311,9 @@ under CC BY-NC-SA 3.0 by Karlsruhe Institute of Technology and Toyota
 Technological Institute at Chicago. The 20-frame fixture under `tests/fixtures/`
 consists of annotation text files from that dataset, retained under the same
 non-commercial terms for the purpose of testing this software.
+
+---
+
+Built by **Mo Kamel**, M.Eng. Mechatronic and Cyber-Physical Systems, Technische
+Hochschule Deggendorf.
+[Portfolio](https://mkamel7.github.io) · [LinkedIn](https://linkedin.com/in/mo-kamel7)
