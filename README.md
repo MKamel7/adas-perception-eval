@@ -1,5 +1,11 @@
 # ADAS perception evaluation
 
+[![CI](https://github.com/MKamel7/adas-perception-eval/actions/workflows/ci.yml/badge.svg)](https://github.com/MKamel7/adas-perception-eval/actions)
+[![Dataset](https://img.shields.io/badge/dataset-KITTI-orange)](https://www.cvlibs.net/datasets/kitti/)
+[![Validated against](https://img.shields.io/badge/mAP-validated%20vs%20pycocotools-brightgreen)](tests)
+[![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
+
+
 **Aggregate metrics hide the failures that matter.** A detector reported at 0.68
 mAP can be near-blind to occluded pedestrians beyond 40 metres and the single
 number will never say so. This repository is the harness that says so: slice-based
@@ -12,7 +18,12 @@ detector is a pretrained commodity. What is built is the thing that decides
 whether a detector is good enough, which is what perception validation teams
 actually spend their days on.
 
-## Status
+![slice-based detection on KITTI](outputs/p3-showcase.gif)
+
+*Detections as the harness sees them. The point of the project is not the boxes, it is
+knowing which slices of the data they fail on.*
+
+## 🚦 Status
 
 **All eight milestones are done. Milestone 2 MISSED its performance criterion**
 and is recorded as missed rather than adjusted to fit the result. The criteria were
@@ -20,7 +31,7 @@ written before any code, so a result cannot be rationalised into a pass
 afterwards, and that cuts both ways: M2's budget is missed and is recorded as
 missed rather than adjusted.
 
-## The result
+## 📊 The result
 
 **The full KITTI training split: 7481 frames, 40,570 annotated objects.** YOLOv8s exported to ONNX, IoU 0.5.
 
@@ -72,7 +83,7 @@ Car spreads 5.7x between its best slice and its worst. The spec predicted 2x to
 3x before running, so the prediction understated the effect; that is recorded
 here rather than quietly updated.
 
-## The showcase
+## 🖼️ The showcase
 
 `outputs/p3-showcase.mp4` is 55 seconds covering the whole argument in the order
 that makes it mean something: the aggregate shown once so it can be set aside,
@@ -86,7 +97,7 @@ moves the video with it and a video that disagrees with the evaluation cannot be
 produced. `outputs/p3-demo.mp4` is the shorter 21 s piece on the distance
 finding alone.
 
-## Why calibration is in a 2D detection benchmark
+## 🎚️ Why calibration is in a 2D detection benchmark
 
 Because KITTI annotates each object twice, in two different spaces: a 3D position
 in camera coordinates and a 2D box in the image. Those two are redundant, and
@@ -134,7 +145,7 @@ rectification. The sweep is what said otherwise. This is the same lesson as the
 [virtual production cell](https://github.com/MKamel7/virtual-production-cell):
 coverage measures which lines ran, not which situations were imagined.
 
-## What is being measured, and against what
+## 📏 What is being measured, and against what
 
 | Layer | Choice | What it beat, and why |
 |---|---|---|
@@ -148,7 +159,7 @@ coverage measures which lines ran, not which situations were imagined.
 `pycocotools` is a dependency of the **tests**, never of the pipeline. Nothing in
 the measurement path may import it, or the validation would be circular.
 
-## Milestones
+## 🗳️ Milestones
 
 | # | Milestone | Done when |
 |---|---|---|
@@ -210,7 +221,7 @@ shows YOLOv8n misses it too. The criterion was optimistic when it was written
 and it is left standing, marked as missed, rather than quietly relaxed to
 whatever the hardware happens to deliver.
 
-## The analysis in full
+## 📖 The analysis in full
 
 The nine sections below are the detailed analysis: the sim-to-real comparison,
 the error-type decomposition, the threshold argument, the SOTIF taxonomy and its
@@ -228,7 +239,7 @@ entry point.
 - [Calibration, and why the sign matters more than the size](docs/ANALYSIS.md#calibration-and-why-the-sign-matters-more-than-the-size)
 - [Is this frame the kind of thing we validated on?](docs/ANALYSIS.md#is-this-frame-the-kind-of-thing-we-validated-on)
 
-## Expected results, recorded before running
+## 🔮 Expected results, recorded before running
 
 - **Cars around 0.5 to 0.7 mAP@0.5**, pedestrians and cyclists materially worse.
   Anything above 0.9 means the ground-truth handling is wrong, not that the
@@ -241,7 +252,26 @@ entry point.
   validation has some predictive value here. If it does not, that is the more
   interesting finding and it gets reported just as loudly.
 
-## Honest limits
+## 💡 What I learned
+
+- **An aggregate metric is a place for failures to hide.** A detector at 0.68 mAP can
+  be close to blind on occluded pedestrians past 40 metres, and the single number will
+  never tell you. Slicing the evaluation is the whole point of the repository.
+
+- **Validate your metric before you trust your result.** I checked the mAP
+  implementation against pycocotools rather than assuming mine was right. If the ruler
+  is wrong, every measurement taken with it is wrong in the same direction and nothing
+  downstream will reveal it.
+
+- **Writing down the expected result before running it is uncomfortable and useful.**
+  It is the difference between a prediction and a rationalisation, and it is the
+  cheapest defence against fitting the story to whatever came out.
+
+- **Confidence calibration belongs in a detection benchmark.** A box is not just right
+  or wrong. A detector that is confidently wrong is more dangerous in a vehicle than
+  one that is uncertain and says so, and mAP alone cannot see that difference.
+
+## ⚠️ Honest limits
 
 - Pretrained COCO weights evaluated on KITTI classes. A KITTI-trained model would
   score higher. The score is not the deliverable.
@@ -261,7 +291,7 @@ entry point.
   run the full evaluation, because KITTI is gigabytes and a CI job claiming
   otherwise would be lying.
 
-## Getting the data
+## 📥 Getting the data
 
 KITTI is not redistributed here. `data/` is gitignored; the committed 20-frame
 fixture under `tests/fixtures/` is what the test suite runs against.
@@ -271,11 +301,11 @@ uv sync --group dev
 uv run pytest
 ```
 
-## Deliberately not doing
+## 🚫 Deliberately not doing
 
  **nuScenes, BDD100K or Waymo before the metamorphic curves exist** (large, licence-gated, and they answer a question the harness has not yet shown it can express). Not training a better detector either, which would make the numbers nicer and the point weaker.
 
-## Licence
+## 📄 Licence
 
 Code under MIT, see [LICENSE](LICENSE).
 
