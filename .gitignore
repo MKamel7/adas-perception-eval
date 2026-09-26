@@ -21,6 +21,9 @@ outputs/*
 !outputs/models.json
 !outputs/p3-demo.mp4
 !outputs/p3-showcase.mp4
+!outputs/p3-showcase.gif
+!outputs/robustness.md
+!outputs/robustness.csv
 !outputs/examples/
 outputs/examples/*
 !outputs/examples/*.png
