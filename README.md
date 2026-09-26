@@ -81,7 +81,7 @@ so rather than letting an overlap read as a null result.
 
 Distance here is **depth along the optical axis**, not radial distance to the
 object. That is the quantity time-to-collision depends on, and the choice
-matters: 9.7% of pedestrians would fall in a different band under the other
+matters: 10.3% of pedestrians would fall in a different band under the other
 definition, so it is stated rather than left implicit.
 
 **A pedestrian detector reported at 0.506 is effectively blind beyond 30 metres.**
@@ -127,7 +127,7 @@ is an assumption, not evidence.
 ### And that guard has a measured limit, not an assumed one
 
 The calibration code reached 100% branch coverage, which said nothing useful. So
-the calibration was broken six different ways to find out which breakages the
+the calibration was broken five different ways to find out which breakages the
 check would actually notice:
 
 | Injected fault | Caught |
@@ -178,7 +178,7 @@ the measurement path may import it, or the validation would be circular.
 | M3 | Metrics validated | **done.** Own AP agrees with `pycocotools` **exactly, to six decimal places**, against a required 0.001 |
 | M4 | Slicing | **done.** Six dimensions, every one from a ground-truth attribute, all committed before the run |
 | M5 | Sim-to-real | **done.** Six renders of Scene01, rank correlation 0.943 against real, and the finding below |
-| M6 | Taxonomy | **done.** Six triggering conditions, three hazards, seven demonstrating tests, gated in both directions |
+| M6 | Taxonomy | **done.** Nine triggering conditions, four hazards, fourteen demonstrating tests, gated in both directions |
 | M7 | Report | **done.** One command produces `outputs/report.html` |
 | M8 | Demo and README | **done.** A 55 s showcase covering every finding, a 21 s distance scene, example frames chosen by rule, README |
 
@@ -205,7 +205,7 @@ reaches it.** The budget was written for hardware this is not, and swapping the
 model does not rescue it.
 
 What the smaller model actually costs is modest: 4.5% of Car AP, 9.5% of
-Pedestrian AP, and 3.8 points of pedestrian recall ceiling. If the constraint
+Pedestrian AP, and 3.9 points of pedestrian recall ceiling. If the constraint
 were throughput rather than a fixed budget, that is a defensible trade. It is
 recorded here because "a smaller model would fix it" is the kind of sentence
 that sounds like analysis and contains no information until somebody measures
@@ -314,6 +314,6 @@ non-commercial terms for the purpose of testing this software.
 
 ---
 
-Built by **Mo Kamel**, M.Eng. Mechatronic and Cyber-Physical Systems, Technische
+Built by **Mo Kamel**, M.Eng. student in Mechatronic and Cyber-Physical Systems, Technische
 Hochschule Deggendorf.
 [Portfolio](https://mkamel7.github.io) · [LinkedIn](https://linkedin.com/in/mo-kamel7)

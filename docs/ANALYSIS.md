@@ -19,12 +19,12 @@ own thesis turned on itself:
 
 | distance | real AP | real share | synthetic AP | synthetic share |
 |---|---|---|---|---|
-| 0-10 m | 0.862 | 12.8% | 0.885 | 3.7% |
-| 10-20 m | 0.804 | 22.9% | 0.975 | 6.9% |
-| 20-30 m | 0.656 | 23.2% | 0.801 | 8.3% |
-| 30-40 m | 0.518 | 17.4% | 0.557 | 9.8% |
-| 40-50 m | 0.341 | 12.3% | 0.367 | 9.9% |
-| >50 m | 0.172 | 11.4% | 0.098 | **61.5%** |
+| 0-10 m | 0.866 | 13.2% | 0.885 | 3.7% |
+| 10-20 m | 0.793 | 23.3% | 0.975 | 6.9% |
+| 20-30 m | 0.668 | 23.3% | 0.801 | 8.3% |
+| 30-40 m | 0.501 | 17.7% | 0.557 | 9.8% |
+| 40-50 m | 0.326 | 11.4% | 0.367 | 9.9% |
+| >50 m | 0.164 | 11.1% | 0.098 | **61.5%** |
 | **overall** | **0.754** | | **0.350** | |
 
 **Band by band the two agree closely.** Synthetic is equal or better in five of
@@ -33,7 +33,7 @@ only on which of the two *easiest* bands is easiest. **In aggregate they look
 completely different**, 0.754 against 0.350.
 
 The gap is not behaviour, it is **composition**: 61.5% of the synthetic cars sit
-beyond 50 m against 11.4% of the real ones. An aggregate sim-to-real comparison
+beyond 50 m against 11.1% of the real ones. An aggregate sim-to-real comparison
 would have concluded that the simulation behaves nothing like reality. It does;
 it is simply populated differently. That is Simpson's paradox in a validation
 pipeline, and it is the same argument this project makes about single numbers,
@@ -156,7 +156,7 @@ consequential thing this evaluation does.
 
 A 1.6x gain in recall bought with a **26x** rise in phantom detections. At 2.39
 false alarms per frame, a vehicle running ten frames a second reacts to
-something imaginary twenty-two times a second.
+something imaginary twenty-four times a second.
 
 **Both directions are hazards**, which is why the hazard analysis now has four
 and not three: every one of the original set was about failing to react, and a
@@ -181,17 +181,17 @@ that a number was low.
 | | Condition | Evidence |
 |---|---|---|
 | TC-01 | Pedestrian beyond ~30 m | AP 0.709 → 0.352 → 0.077 → 0.009 → 0.000 by range |
-| TC-02 | Occlusion, the strongest predictor measured | Pedestrian 0.642 → 0.188 → 0.023 |
-| TC-03 | Small apparent size, independent of range | Pedestrian under 40 px: 0.005 |
-| TC-04 | Vehicles beyond 50 m | Car 0.900 → 0.172 |
-| TC-05 | Truncation costs pedestrians, not cars | Car flat at 0.72-0.75; Pedestrian 0.479 → 0.103 |
-| TC-06 | The class mapping cannot represent a cyclist | AP 0.006, a measurement artefact, not a detector limit |
+| TC-02 | Occlusion, the strongest predictor measured | Pedestrian 0.650 → 0.178 → 0.026 |
+| TC-03 | Small apparent size, independent of range | Pedestrian 0.000 under 25 px, 0.004 at 25-40 px |
+| TC-04 | Vehicles beyond 50 m | Car 0.866 → 0.164 |
+| TC-05 | Truncation costs pedestrians, not cars | Car flat at 0.71-0.74; Pedestrian 0.480 → 0.101 |
+| TC-06 | The class mapping cannot represent a cyclist | AP 0.008, a measurement artefact, not a detector limit |
 | TC-07 | Pedestrian recall has a ceiling no threshold reaches | 68.7% at any operating point |
 | TC-08 | Recall is bought with false alarms faster than linearly | Car 0.09 to 2.39 per frame for 50% to 80% |
 | TC-09 | Vehicles are found but boxed loosely | AP 0.849 to 0.525 across IoU 0.3 to 0.7; 73% of misses are box problems |
 
 **A negative result is recorded in the same file**: horizontal position in the
-frame predicts nothing (Car 0.715 / 0.705 / 0.680 across thirds). A taxonomy
+frame predicts nothing (Car 0.720 / 0.696 / 0.677 across thirds). A taxonomy
 containing only the slices that worked is a fishing expedition with the evidence
 removed.
 
